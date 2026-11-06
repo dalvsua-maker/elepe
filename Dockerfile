@@ -27,4 +27,6 @@ RUN sed -ri 's/Listen 80/Listen ${PORT}/' /etc/apache2/ports.conf \
 # Código del proyecto dentro de la imagen
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /var/www/html
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 COPY . .
