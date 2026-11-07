@@ -8,6 +8,7 @@
 - **Dinero:** entero en céntimos (`precioCentimos`, `totalCentimos`); el admin escribe euros y PHP convierte con `round($euros * 100)`.
 - **Imágenes:** se guardan en Atlas (colección `imagenes`), no en disco, porque el disco de un servicio gratuito se pierde en cada reinicio.
 - **Stock:** se descuenta al confirmar el pedido, no al añadir a la cesta; si el admin rechaza el pedido, se devuelve.
+- **Visitante y cesta:** el visitante puede añadir a la cesta (que vive en su sesión de PHP), pero solo el comprador puede confirmar el pedido. Como la cesta no descuenta stock, una cesta abandonada no bloquea discos.
 
 ## 1. Estructura de carpetas y ficheros
 
@@ -16,7 +17,8 @@ TiendaOnline/
 ├── public/                         ← lo único accesible desde el navegador
 │   ├── index.php, tienda.php, contacto.php, gracias.php
 │   ├── iniciar_sesion.php, registro.php
-│   ├── cesta.php, mis_datos.php, mis_pedidos.php        (comprador)
+│   ├── cesta.php                                        (visitante y comprador)
+│   ├── mis_datos.php, mis_pedidos.php                   (comprador)
 │   ├── admin_discos.php, admin_solicitudes.php          (admin)
 │   ├── css/    bootstrap.min.css, estilos.css
 │   ├── js/     bootstrap.bundle.min.js, api.js, un .js por página
@@ -41,19 +43,21 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 
 | Quién | Páginas |
 |---|---|
-| Todos | Inicio, Tienda, Contacto, Gracias, Iniciar sesión, Registrarse |
-| Comprador | Cesta, Mis datos, Mis pedidos |
+| Todos (la cesta, salvo el admin) | Inicio, Tienda, Contacto, Gracias, Iniciar sesión, Registrarse, Cesta |
+| Comprador | Mis datos, Mis pedidos |
 | Admin | Mis datos, Discos, Solicitudes |
 
-- **Cabecera:** Inicio · Tienda · Contacto, icono de cesta (con `badge` del número de discos) e icono de persona (menú desplegable).
+- **Cabecera:** Inicio · Tienda · Contacto, icono de cesta (con `badge` del número de discos; lo ven el visitante y el comprador, no el admin) e icono de persona (menú desplegable).
 - **Menú de la persona:** visitante → "Iniciar sesión" y "Registrarse"; comprador → "Mis datos", "Mis pedidos" y "Cerrar sesión"; admin → "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión".
 - Un usuario con sesión que abre "Iniciar sesión" o "Registrarse" va al inicio.
 
 ## 3. Sesiones y protección por rol
 
 - `session_start()`; la cookie `PHPSESSID` guarda solo el identificador. Los datos viven en el servidor: `$_SESSION["idUsuario"]`, `$_SESSION["rol"]` y `$_SESSION["cesta"]`.
-- Al iniciar sesión se llama a `session_regenerate_id(true)`; al cerrarla, a `session_destroy()`.
-- **Dos capas:** (1) cada página protegida comprueba el rol antes de escribir HTML y redirige si no corresponde; (2) cada endpoint de `api/` repite la comprobación y responde 401 o 403 en JSON (la protección real).
+- El visitante también tiene sesión y, por tanto, `$_SESSION["cesta"]`.
+- Al iniciar sesión se llama a `session_regenerate_id(true)`, que cambia el identificador pero conserva los datos: la cesta del visitante pasa al comprador (si entra un admin, se vacía). Al cerrar sesión se llama a `session_destroy()`.
+- Tras iniciar sesión o registrarse desde la cesta, el usuario vuelve a ella mediante un parámetro de retorno que PHP solo acepta si es una página de una lista fija (nunca una URL cualquiera).
+- **Dos capas:** (1) cada página protegida comprueba el rol antes de escribir HTML y redirige si no corresponde; (2) cada endpoint de `api/` repite la comprobación y responde 401 o 403 en JSON (la protección real). Los endpoints de la cesta están abiertos a visitante y comprador (403 al admin); el de confirmar pedido solo admite compradores (401 al visitante, 403 al admin).
 - Todo se centraliza en la clase `Sesion`.
 
 ## 4. Modelo de datos (MongoDB Atlas, base `elepe_app`)
@@ -72,7 +76,7 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 
 ## 5. Flujo de compra y stock
 
-1. Añadir a la cesta solo comprueba que haya stock; no lo descuenta.
+1. Añadir a la cesta (visitante o comprador) solo comprueba que haya stock; no lo descuenta. Confirmar el pedido exige ser comprador.
 2. Al confirmar, cada línea se descuenta con una operación atómica (restar solo si el stock es suficiente). Se procesan una a una y se para en la primera que falla; se devuelven solo las ya descontadas y no se crea el pedido.
 3. Si todo va bien, se inserta el pedido en estado `pendiente`. Si la inserción falla, se devuelve también el stock.
 4. Aceptar no toca el stock (ya estaba descontado). Rechazar marca `rechazado` (solo si seguía `pendiente`) y suma el stock de cada línea.

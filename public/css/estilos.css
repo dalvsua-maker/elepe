@@ -1,0 +1,54 @@
+/* Fuentes */
+@font-face {
+  font-family: "Playfair Display";
+  src: url("../fonts/playfair-display-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Variables */
+:root {
+  --fondo: #14110f;
+  --superficie: #1f1a17;
+  --texto: #f3ece4;
+  --acento: #e8a33d;
+  --acento-oscuro: #c98a2b;
+}
+
+/* Tema oscuro de Bootstrap con los colores de Elepe */
+[data-bs-theme="dark"] {
+  --bs-body-bg: var(--fondo);
+  --bs-body-color: var(--texto);
+  --bs-tertiary-bg: var(--superficie);
+  --bs-link-color-rgb: 232, 163, 61;
+  --bs-link-hover-color-rgb: 201, 138, 43;
+}
+
+/* Tipografía: los títulos usan Playfair Display */
+h1,
+h2,
+h3,
+.navbar-brand {
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+}
+
+/* Botón principal en ámbar */
+.btn-primary {
+  --bs-btn-color: var(--fondo);
+  --bs-btn-bg: var(--acento);
+  --bs-btn-border-color: var(--acento);
+  --bs-btn-hover-color: var(--fondo);
+  --bs-btn-hover-bg: var(--acento-oscuro);
+  --bs-btn-hover-border-color: var(--acento-oscuro);
+  --bs-btn-active-color: var(--fondo);
+  --bs-btn-active-bg: var(--acento-oscuro);
+  --bs-btn-active-border-color: var(--acento-oscuro);
+  --bs-btn-focus-shadow-rgb: 232, 163, 61;
+}
+
+/* Tarjetas sobre la superficie */
+.card {
+  --bs-card-bg: var(--superficie);
+}

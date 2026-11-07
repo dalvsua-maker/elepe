@@ -17,9 +17,9 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 
 | Rol | Qué puede hacer |
 |---|---|
-| Visitante | Ver la landing, la tienda y el contacto. No puede comprar: al pulsar "Añadir a la cesta" se le invita a iniciar sesión o registrarse. |
-| Comprador | Todo lo anterior, más: cesta, confirmar pedidos, ver y editar sus datos, historial de pedidos y "volver a comprar". |
-| Administrador | Gestionar los discos (añadir, editar, eliminar), aceptar o rechazar solicitudes de compra y ver sus datos. **No puede comprar.** |
+| Visitante | Ver la landing, la tienda y el contacto, y añadir discos a la cesta. No puede confirmar el pedido: al pulsar "Confirmar pedido" se le invita a iniciar sesión o registrarse. |
+| Comprador | Todo lo anterior, más: confirmar pedidos, ver y editar sus datos, historial de pedidos y "volver a comprar". |
+| Administrador | Gestionar los discos (añadir, editar, eliminar), aceptar o rechazar solicitudes de compra y ver sus datos. **No puede comprar** (no ve la cesta). |
 
 ## 4. Requisitos funcionales
 
@@ -31,7 +31,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
   - Teléfono: 9 cifras empezando por 6, 7, 8 o 9.
   - Contraseña: mínimo 8 caracteres, con al menos una letra y un número.
 - **RF-03:** El login usa email y contraseña. Si falla, el mensaje es siempre el mismo ("Email o contraseña incorrectos").
-- **RF-04:** Al cerrar sesión se destruye la sesión (se pierde la cesta).
+- **RF-04:** Al cerrar sesión se destruye la sesión (se pierde la cesta). Al iniciar sesión o registrarse, la cesta del visitante pasa al comprador; si quien entra es un administrador, la cesta se vacía.
 - **RF-05:** El administrador se crea con un script de PHP fuera de `public/`, ejecutado por terminal, que recibe el rol como argumento.
 - **RF-06:** En "Mis datos" se pueden editar nombre, apellidos, teléfono y dirección. El email y la contraseña no se editan.
 - **RF-07:** La dirección de entrega (`calle`, `codigoPostal`, `localidad`, `provincia`) se rellena en el perfil y es obligatoria para confirmar un pedido.
@@ -40,10 +40,10 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RF-08:** El catálogo tiene 12 discos, 4 géneros (Rock, Jazz, Pop y Electrónica) con 3 discos cada uno.
 - **RF-09:** Cada disco se muestra en una ficha con portada, título, artista, género, precio, selector de unidades (de 1 al stock) y botón "Añadir a la cesta". Si no hay stock, muestra "Agotado".
 - **RF-10:** La tienda se puede filtrar por género. El filtro lo hace el servidor.
-- **RF-11:** Un visitante que pulsa "Añadir a la cesta" ve un modal que le invita a iniciar sesión o registrarse.
+- **RF-11:** El visitante puede añadir discos a la cesta igual que un comprador. Al pulsar "Confirmar pedido" ve un modal "Inicia sesión para confirmar tu pedido" con enlaces a iniciar sesión y registrarse, y tras entrar vuelve a la cesta con su contenido.
 
 ### Cesta y pedidos
-- **RF-12:** La cesta se guarda en la sesión de PHP. Al añadir un disco sale un modal "Añadido a la cesta".
+- **RF-12:** La cesta se guarda en la sesión de PHP (también la del visitante). Al añadir un disco sale un modal "Añadido a la cesta".
 - **RF-13:** En la cesta se pueden cambiar las unidades (de 1 al stock), quitar discos y ver el total. Una cesta vacía muestra un mensaje y un botón para ir a la tienda.
 - **RF-14:** Precio y stock se leen siempre de la base de datos; el pedido copia el precio del momento de confirmar.
 - **RF-15:** Antes de enviar el pedido se pide confirmación en un modal. Al confirmar, el stock se descuenta y el pedido queda en estado `pendiente`.
@@ -70,7 +70,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RNF-01:** Solo HTML, CSS, Bootstrap, JS, PHP y MongoDB Atlas (Docker y Composer permitidos).
 - **RNF-02:** Las credenciales de Atlas solo existen en el servidor (`.env`), nunca en el JS ni en el repositorio.
 - **RNF-03:** PHP valida todo lo que recibe; la validación del JS solo ayuda al usuario.
-- **RNF-04:** Cada página protegida comprueba el rol antes de enviar HTML, y cada endpoint de `api/` lo vuelve a comprobar (responde 401 o 403 en JSON).
+- **RNF-04:** Cada página protegida comprueba el rol antes de enviar HTML, y cada endpoint de `api/` lo vuelve a comprobar (responde 401 o 403 en JSON). Los endpoints de la cesta están abiertos a visitante y comprador; confirmar el pedido es solo para el comprador.
 - **RNF-05:** Las contraseñas se guardan con `password_hash` y se comprueban con `password_verify`; nunca se guarda la contraseña.
 - **RNF-06:** El dinero se guarda como entero en céntimos para evitar errores de decimales.
 - **RNF-07:** Si Atlas falla, el servidor responde `BD_NO_DISPONIBLE` (503) y el detalle va al registro del servidor.
