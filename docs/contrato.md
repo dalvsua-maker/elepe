@@ -23,4 +23,13 @@
 
 ## Operaciones
 
-Todavía no hay endpoints: el de prueba de la fase 0 ya se retiró. Cada operación se documenta aquí (método, entrada, respuestas y errores) cuando se implementa, a partir de la fase 2.
+Cada operación se documenta aquí (método, entrada, respuestas y errores) cuando se implementa.
+
+### POST /api/registro.php
+
+Crea una cuenta de comprador, inicia la sesión y conserva la cesta del visitante.
+
+- **Quién:** solo visitantes (con sesión iniciada responde 403).
+- **Entrada (JSON):** `nombre`, `apellidos`, `email`, `telefono`, `contrasena` y, opcional, `volver` (por ejemplo `"cesta"`). El rol no se envía: siempre se crea un comprador.
+- **201:** `{"ok": true, "destino": "/"}`. `destino` es la página a la que ir (`/cesta.php` si `volver` es `"cesta"`).
+- **Errores:** 400 `NOMBRE_INVALIDO`, `APELLIDOS_INVALIDOS`, `EMAIL_INVALIDO`, `TELEFONO_INVALIDO`, `CONTRASENA_INVALIDA` o `DATOS_INVALIDOS`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 409 `EMAIL_YA_REGISTRADO`; 503 `BD_NO_DISPONIBLE`.

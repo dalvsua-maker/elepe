@@ -48,3 +48,14 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-34 · RF-03** — Pasos: `docker compose exec web php -r "require 'src/Sesion.php'; Sesion::entrar('abc123', 'comprador'); echo Sesion::rol(), ' ', Sesion::idUsuario();"`. **Esperado:** `comprador abc123`
 - [ ] **P-35 · RF-04** — Pasos: `docker compose exec web php -r "require 'src/Sesion.php'; Sesion::entrar('abc123', 'comprador'); Sesion::salir(); echo Sesion::rol();"`. **Esperado:** `visitante`
 - [ ] **P-36 · RNF-04** — Pasos: `docker compose exec web php -r "require 'src/Sesion.php'; Sesion::entrar('abc123', 'comprador'); Sesion::exigirRolApi(['admin']);"`. **Esperado:** `{"ok":false,"error":"SIN_PERMISO"}`
+- [ ] **P-37 · RF-01** — Pasos: Como visitante, abrir `http://localhost:8081/registro.php`. **Esperado:** Formulario con nombre, apellidos, email, teléfono, contraseña y repetir contraseña
+- [ ] **P-38 · RF-02** — Pasos: Pulsar "Registrarse" con el formulario vacío (con F12 → Network abierto). **Esperado:** Todos los campos en rojo con su mensaje y no se envía ninguna petición
+- [ ] **P-39 · RF-02** — Pasos: Escribir contraseñas distintas en los dos campos y enviar. **Esperado:** "Las contraseñas no coinciden." en el segundo campo
+- [ ] **P-40 · RF-01, RNF-05** — Pasos: Rellenar bien el formulario y enviar. **Esperado:** Redirige a `/`, el menú de la persona muestra "Mis datos", "Mis pedidos" y "Cerrar sesión"; en Atlas el usuario tiene `rol: comprador`, `direccion: null` y `hashContrasena` que empieza por `$2y$`, y no existe ningún campo con la contraseña
+- [ ] **P-41 · RF-01** — Pasos: Registrarse otra vez con el mismo email (en una ventana privada). **Esperado:** "Ese email ya tiene una cuenta." y no se crea un segundo usuario
+- [ ] **P-42 · RF-04** — Pasos: Con la sesión iniciada, abrir `/registro.php`. **Esperado:** Redirige a `/`
+- [ ] **P-43 · RF-01, RNF-03** — Pasos: `curl -X POST http://localhost:8081/api/registro.php -H "Content-Type: application/json" -d "{\"nombre\":\"Pepe Lopez\",\"apellidos\":\"Garcia Ruiz\",\"email\":\"rol@elepe.test\",\"telefono\":\"612345678\",\"contrasena\":\"abcdefg1\",\"rol\":\"admin\"}"`. **Esperado:** 201 y, en Atlas, el usuario tiene `rol: comprador` (se ignora el `rol` enviado)
+- [ ] **P-44 · RNF-03** — Pasos: El mismo `curl` con `"nombre":"A"`. **Esperado:** `{"ok":false,"error":"NOMBRE_INVALIDO"}` (PHP valida aunque el JS no)
+- [ ] **P-45 · RNF-04** — Pasos: Abrir `http://localhost:8081/api/registro.php` en el navegador (GET). **Esperado:** `{"ok":false,"error":"METODO_NO_PERMITIDO"}`
+- [ ] **P-46 · RF-11** — Pasos: Registrarse desde `/registro.php?volver=cesta` y mirar la respuesta en F12 → Network. **Esperado:** `"destino":"/cesta.php"`
+- [ ] **P-47 · RF-11, RNF-03** — Pasos: Registrarse desde `/registro.php?volver=https://sitio-malo.com`. **Esperado:** `"destino":"/"` (un valor fuera de la lista permitida se ignora)

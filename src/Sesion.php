@@ -5,6 +5,9 @@ require_once __DIR__ . '/Respuesta.php';
 /** Gestiona la sesión de PHP y decide quién puede entrar: PHP decide, el JS solo muestra */
 class Sesion
 {
+    /** Páginas a las que se puede volver tras iniciar sesión (lista permitida) */
+    private const PAGINAS_VOLVER = ['cesta' => '/cesta.php'];
+
     /**
      * Abre la sesión si todavía no está abierta. Hay que llamarla antes de escribir nada de HTML.
      */
@@ -106,5 +109,20 @@ class Sesion
         self::iniciar();
 
         return $_SESSION['idUsuario'] ?? null;
+    }
+
+    /**
+     * Página a la que ir tras iniciar sesión o registrarse. Solo acepta las de la lista permitida;
+     * cualquier otro valor (o ninguno) lleva al inicio.
+     *
+     * @param mixed $volver Valor de "volver" que envía el navegador, por ejemplo "cesta".
+     */
+    public static function destinoTrasEntrar(mixed $volver): string
+    {
+        if (is_string($volver) && isset(self::PAGINAS_VOLVER[$volver])) {
+            return self::PAGINAS_VOLVER[$volver];
+        }
+
+        return '/';
     }
 }
