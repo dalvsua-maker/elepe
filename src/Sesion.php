@@ -65,4 +65,46 @@ class Sesion
 
         Respuesta::error(403, 'SIN_PERMISO');
     }
+
+    /**
+     * Marca la sesión como iniciada por un usuario. Se llama justo después de comprobar su contraseña.
+     * Si es admin, se vacía la cesta que pudiera traer como visitante.
+     *
+     * @param string $idUsuario Id del usuario en Atlas.
+     * @param string $rol "comprador" o "admin".
+     */
+    public static function entrar(string $idUsuario, string $rol): void
+    {
+        self::iniciar();
+        session_regenerate_id(true);
+
+        $_SESSION['idUsuario'] = $idUsuario;
+        $_SESSION['rol'] = $rol;
+
+        if ($rol === 'admin') {
+            $_SESSION['cesta'] = [];
+        }
+    }
+
+    /**
+     * Cierra la sesión y borra todos sus datos (también la cesta).
+     */
+    public static function salir(): void
+    {
+        self::iniciar();
+        $_SESSION = [];
+        session_destroy();
+    }
+
+    /**
+     * Id del usuario con sesión iniciada.
+     *
+     * @return string|null null si es un visitante.
+     */
+    public static function idUsuario(): ?string
+    {
+        self::iniciar();
+
+        return $_SESSION['idUsuario'] ?? null;
+    }
 }

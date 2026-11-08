@@ -2,7 +2,7 @@
 
 Tienda online de discos y vinilos para navegador. Tiene una landing, una tienda con filtro por género, contacto, cuentas de comprador (cesta, pedidos y su historial) y un panel de administración para gestionar los discos y aceptar o rechazar las solicitudes de compra.
 
-**Estado:** en desarrollo (fase 0 de 9: preparación del entorno y conexión con Atlas). Todavía no hay páginas; este README se irá completando.
+**Estado:** en desarrollo (fase 2 de 9: cuentas). Este README se irá completando.
 
 ## Tecnologías
 
@@ -24,12 +24,16 @@ Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base
    ```
    docker compose exec web composer install
    ```
-4. Comprueba que PHP conecta con Atlas:
+4. Prepara la base de datos (crea los índices; solo hace falta una vez y se puede repetir):
+   ```
+   docker compose exec web php scripts/preparar_bd.php
+   ```
+5. Comprueba que PHP conecta con Atlas:
    ```
    docker compose exec web php -r "require 'src/BaseDeDatos.php'; BaseDeDatos::ping(); echo 'ok';"
    ```
    Debe imprimir `ok`.
-5. La web estará en `http://localhost:8081` cuando existan las primeras páginas.
+6. La web estará en `http://localhost:8081`.
 
 Si cambias el `.env`, recrea el contenedor con `docker compose up -d --force-recreate`.
 
@@ -47,7 +51,8 @@ El archivo `.env` contiene credenciales y **nunca se sube a Git** (está en `.gi
 ```
 Dockerfile, docker-compose.yml  Imagen (desarrollo y producción) y arranque local
 public/            Lo único accesible desde el navegador (páginas, css, js, img, api)
-src/               PHP interno: configuración y conexión con Atlas
+src/               PHP interno: configuración, conexión con Atlas, sesiones y validación
+scripts/           Scripts de terminal (preparar la base de datos)
 docs/              Documentación del proyecto
 ```
 

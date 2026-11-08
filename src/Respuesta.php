@@ -42,4 +42,21 @@ class Respuesta
         error_log($origen . ': ' . $fallo->getMessage());
         self::error(503, 'BD_NO_DISPONIBLE');
     }
+
+    /**
+     * Devuelve el valor si es válido; si es null, responde con el error y corta.
+     *
+     * @param mixed  $valor       Resultado de un método de Validador.
+     * @param string $codigoError Código de error del contrato, por ejemplo EMAIL_INVALIDO.
+     * @param int    $codigoHttp  Código HTTP de la respuesta de error.
+     * @return mixed
+     */
+    public static function exigir(mixed $valor, string $codigoError, int $codigoHttp = 400): mixed
+    {
+        if ($valor === null) {
+            self::error($codigoHttp, $codigoError);
+        }
+
+        return $valor;
+    }
 }
