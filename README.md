@@ -33,7 +33,11 @@ Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base
    docker compose exec web php -r "require 'src/BaseDeDatos.php'; BaseDeDatos::ping(); echo 'ok';"
    ```
    Debe imprimir `ok`.
-6. La web estará en `http://localhost:8081`.
+6. Crea la cuenta del administrador (pide los datos por terminal; también vale `comprador` como rol):
+   ```
+   docker compose exec web php scripts/crear_cuenta.php admin
+   ```
+7. La web estará en `http://localhost:8081`.
 
 Si cambias el `.env`, recrea el contenedor con `docker compose up -d --force-recreate`.
 
@@ -52,7 +56,7 @@ El archivo `.env` contiene credenciales y **nunca se sube a Git** (está en `.gi
 Dockerfile, docker-compose.yml  Imagen (desarrollo y producción) y arranque local
 public/            Lo único accesible desde el navegador (páginas, css, js, img, api)
 src/               PHP interno: configuración, conexión con Atlas, sesiones y validación
-scripts/           Scripts de terminal (preparar la base de datos)
+scripts/           Scripts de terminal (preparar la base de datos y crear cuentas)
 docs/              Documentación del proyecto
 ```
 

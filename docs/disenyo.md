@@ -21,7 +21,7 @@ TiendaOnline/
 │   ├── mis_datos.php, mis_pedidos.php                   (comprador)
 │   ├── admin_discos.php, admin_solicitudes.php          (admin)
 │   ├── css/    bootstrap.min.css, estilos.css
-│   ├── js/     bootstrap.bundle.min.js, api.js, un .js por página
+│   ├── js/     bootstrap.bundle.min.js, api.js, cabecera.js, un .js por página
 │   ├── img/    SVG propios (cesta, persona, logo, disco genérico)
 │   ├── fonts/  Playfair Display y su licencia
 │   └── api/    endpoints PHP (ver contrato.md)
@@ -29,13 +29,13 @@ TiendaOnline/
 │   ├── config.php, BaseDeDatos.php, Respuesta.php, Validador.php
 │   ├── Sesion.php
 │   └── partes/ cabecera.php, pie.php
-├── scripts/ crear_cuenta.php       ← fuera de public/
+├── scripts/ preparar_bd.php, crear_cuenta.php   ← fuera de public/
 ├── docs/   requisitos, disenyo, contrato, pruebas
 └── Dockerfile, docker-compose.yml, .dockerignore, .gitignore,
     .env, .env.example, composer.json, composer.lock, README.md
 ```
 
-Hoy existen: `Dockerfile`, `docker-compose.yml`, `.dockerignore`, `.gitignore`, `.env` (fuera de Git), `.env.example`, `composer.json`, `composer.lock`, `src/config.php`, `src/BaseDeDatos.php` y `docs/`. El resto se crea fase a fase.
+Los archivos se crean fase a fase; el estado de cada fase está en `requisitos.md`.
 
 Los nombres de archivo van en español, en minúsculas y con guion bajo.
 

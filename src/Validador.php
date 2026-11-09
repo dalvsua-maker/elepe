@@ -3,6 +3,9 @@
 /** Valida y limpia los datos que llegan del navegador. Cada método devuelve el valor limpio o null. */
 class Validador
 {
+    /** Roles que existen en la tienda. Es el único sitio donde se listan */
+    public const ROLES = ['comprador', 'admin'];
+
     /**
      * Nombre o apellidos: de 3 a 30 letras (con tildes y ñ) y espacios.
      *
@@ -78,5 +81,34 @@ class Validador
         }
 
         return $valor;
+    }
+
+    /**
+     * Contraseña que se escribe al iniciar sesión: solo se comprueba que sea texto de 1 a 72 caracteres.
+     * No se aplican las reglas del registro; quien decide si es correcta es password_verify.
+     *
+     * @param mixed $valor
+     * @return string|null
+     */
+    public static function contrasenaLogin(mixed $valor): ?string
+    {
+        if (!is_string($valor)) {
+            return null;
+        }
+
+        $largo = strlen($valor);
+
+        return $largo >= 1 && $largo <= 72 ? $valor : null;
+    }
+
+    /**
+     * Rol de una cuenta: solo los de la lista ROLES, escritos tal cual.
+     *
+     * @param mixed $valor
+     * @return string|null
+     */
+    public static function rol(mixed $valor): ?string
+    {
+        return is_string($valor) && in_array($valor, self::ROLES, true) ? $valor : null;
     }
 }

@@ -16,7 +16,7 @@
 | 200 | Correcto |
 | 201 | Creado (registro, pedido, mensaje...) |
 | 400 | Datos mal |
-| 401 | Sin sesión |
+| 401 | Sin sesión, o credenciales incorrectas en el login |
 | 403 | Con sesión pero sin permiso para esa operación |
 | 405 | Método HTTP no permitido |
 | 503 | Base de datos no disponible |
@@ -33,3 +33,21 @@ Crea una cuenta de comprador, inicia la sesión y conserva la cesta del visitant
 - **Entrada (JSON):** `nombre`, `apellidos`, `email`, `telefono`, `contrasena` y, opcional, `volver` (por ejemplo `"cesta"`). El rol no se envía: siempre se crea un comprador.
 - **201:** `{"ok": true, "destino": "/"}`. `destino` es la página a la que ir (`/cesta.php` si `volver` es `"cesta"`).
 - **Errores:** 400 `NOMBRE_INVALIDO`, `APELLIDOS_INVALIDOS`, `EMAIL_INVALIDO`, `TELEFONO_INVALIDO`, `CONTRASENA_INVALIDA` o `DATOS_INVALIDOS`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 409 `EMAIL_YA_REGISTRADO`; 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/login.php
+
+Inicia la sesión con email y contraseña y conserva la cesta del visitante (si quien entra es un administrador, la cesta se vacía).
+
+- **Quién:** solo visitantes (con sesión iniciada responde 403).
+- **Entrada (JSON):** `email`, `contrasena` y, opcional, `volver` (por ejemplo `"cesta"`). El rol no se envía: sale de la base de datos.
+- **200:** `{"ok": true, "destino": "/"}`. `destino` es la página a la que ir (`/cesta.php` si `volver` es `"cesta"`).
+- **Errores:** 400 `DATOS_INVALIDOS` (no es JSON, el email no tiene forma de email o la contraseña está vacía, no es texto o pasa de 72 caracteres); 401 `CREDENCIALES_INCORRECTAS` (el mismo error si el email no existe o la contraseña no coincide); 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/logout.php
+
+Cierra la sesión y borra sus datos, también la cesta.
+
+- **Quién:** cualquiera. Si no había sesión, responde igualmente `ok` (cerrar una sesión ya cerrada no es un error).
+- **Entrada:** ninguna.
+- **200:** `{"ok": true}`.
+- **Errores:** 405 `METODO_NO_PERMITIDO`.

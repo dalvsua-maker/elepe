@@ -1,6 +1,6 @@
 # Elepe — Plan de pruebas
 
-Estado: **fase 0 en curso (06/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
+Estado: **fase 2 en curso (09/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
 
 Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http://localhost:8081`. Cuando un caso sale bien, se marca cambiando `[ ]` por `[x]`. Si falla, se deja `[ ]` y se añade debajo una nota con ❌ y lo que pasó.
 
@@ -59,3 +59,27 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-45 · RNF-04** — Pasos: Abrir `http://localhost:8081/api/registro.php` en el navegador (GET). **Esperado:** `{"ok":false,"error":"METODO_NO_PERMITIDO"}`
 - [ ] **P-46 · RF-11** — Pasos: Registrarse desde `/registro.php?volver=cesta` y mirar la respuesta en F12 → Network. **Esperado:** `"destino":"/cesta.php"`
 - [ ] **P-47 · RF-11, RNF-03** — Pasos: Registrarse desde `/registro.php?volver=https://sitio-malo.com`. **Esperado:** `"destino":"/"` (un valor fuera de la lista permitida se ignora)
+- [ ] **P-48 · RF-03** — Pasos: Como visitante, abrir `http://localhost:8081/iniciar_sesion.php`. **Esperado:** Formulario con email y contraseña, botón "Entrar" y el enlace "¿No tienes cuenta? Regístrate"
+- [ ] **P-49 · RF-03** — Pasos: Pulsar "Entrar" con el formulario vacío (con F12 → Network abierto). **Esperado:** Los dos campos en rojo con su mensaje y no se envía ninguna petición
+- [ ] **P-50 · RF-03** — Pasos: Escribir un email registrado con una contraseña equivocada y enviar. **Esperado:** "Email o contraseña incorrectos." y el botón "Entrar" vuelve a estar activo
+- [ ] **P-51 · RF-03** — Pasos: Escribir un email que no tiene cuenta y enviar. **Esperado:** El mismo mensaje que en P-50 (no se distingue si falla el email o la contraseña)
+- [ ] **P-52 · RF-03, RF-04** — Pasos: Abrir F12 → Application → Cookies y anotar el valor de `PHPSESSID`; iniciar sesión con una cuenta de comprador creada en el registro. **Esperado:** Redirige a `/`; el menú de la persona muestra "Mis datos", "Mis pedidos" y "Cerrar sesión"; el valor de `PHPSESSID` ha cambiado
+- [ ] **P-53 · RF-04** — Pasos: Con la sesión iniciada, abrir `/iniciar_sesion.php`. **Esperado:** Redirige a `/`
+- [ ] **P-54 · RF-11** — Pasos: Como visitante, abrir `/iniciar_sesion.php?volver=cesta`, mirar el enlace "Regístrate" e iniciar sesión (F12 → Network). **Esperado:** El enlace apunta a `/registro.php?volver=cesta` (y, desde `/registro.php?volver=cesta`, "Inicia sesión" apunta a `/iniciar_sesion.php?volver=cesta`); la respuesta de `login.php` trae `"destino":"/cesta.php"`. La página de la cesta llega en la fase 5: hasta entonces la redirección acaba en un 404
+- [ ] **P-55 · RF-11, RNF-03** — Pasos: Iniciar sesión desde `/iniciar_sesion.php?volver=https://sitio-malo.com`. **Esperado:** `"destino":"/"` (un valor fuera de la lista permitida se ignora)
+- [ ] **P-56 · RF-03, RNF-03** — Pasos: `curl -X POST http://localhost:8081/api/login.php -H "Content-Type: application/json" -d "{\"email\":\"prueba@elepe.test\",\"contrasena\":\"\"}"`. **Esperado:** `{"ok":false,"error":"DATOS_INVALIDOS"}` (PHP valida aunque el JS no)
+- [ ] **P-57 · RF-03** — Pasos: El mismo `curl` con un email registrado y una contraseña equivocada, y otra vez con un email que no existe. **Esperado:** Las dos respuestas son idénticas: `{"ok":false,"error":"CREDENCIALES_INCORRECTAS"}`
+- [ ] **P-58 · RNF-04** — Pasos: Abrir `http://localhost:8081/api/login.php` y `http://localhost:8081/api/logout.php` en el navegador (GET). **Esperado:** `{"ok":false,"error":"METODO_NO_PERMITIDO"}` en las dos
+- [ ] **P-59 · RF-04, RNF-04** — Pasos: Con la sesión iniciada, en F12 → Console: `fetch("/api/login.php", {method: "POST", body: "{}"}).then(r => r.json()).then(console.log)`. **Esperado:** `{ok: false, error: "SIN_PERMISO"}` (403)
+- [ ] **P-60 · RF-04** — Pasos: Con la sesión iniciada, abrir el menú de la persona y pulsar "Cerrar sesión". **Esperado:** Vuelve a `/`; el menú muestra "Iniciar sesión" y "Registrarse"; al recargar la página sigue como visitante
+- [ ] **P-61 · RF-04** — Pasos: `curl -X POST http://localhost:8081/api/logout.php` sin sesión. **Esperado:** `{"ok":true}` (cerrar una sesión ya cerrada no es un error)
+- [ ] **P-62 · RNF-08** — Pasos: Abrir F12 → Console en `/`, `/registro.php` y `/iniciar_sesion.php`. **Esperado:** Sin errores de JavaScript (`api.js` y `cabecera.js` se cargan una sola vez, desde la cabecera)
+- [ ] **P-63 · RF-05** — Pasos: `docker compose exec web php scripts/crear_cuenta.php` (sin rol). **Esperado:** `Uso: php scripts/crear_cuenta.php <rol>   (roles: comprador, admin)` y no pregunta nada
+- [ ] **P-64 · RF-05, RNF-03** — Pasos: Repetir con `superadmin` y con `Admin` (mayúscula). **Esperado:** El mismo mensaje de uso en los dos casos (solo valen los roles de la lista, escritos tal cual)
+- [ ] **P-65 · RF-05, RF-02** — Pasos: `docker compose exec web php scripts/crear_cuenta.php admin` y escribir datos malos: nombre `Al`, email `x`, teléfono `512345678`, contraseña `abcdefgh` y, con una buena, una repetición distinta. **Esperado:** Cada dato malo muestra su aviso y vuelve a preguntar lo mismo; la repetición distinta muestra "Las contraseñas no coinciden."
+- [ ] **P-66 · RF-05, RNF-05** — Pasos: Crear un admin con datos válidos. **Esperado:** La contraseña no se ve mientras se escribe; termina con `Cuenta creada: <email> (admin).`; en Atlas el usuario tiene `rol: admin`, `direccion: null` y `hashContrasena` que empieza por `$2y$`, y ningún campo con la contraseña
+- [ ] **P-67 · RF-05, RF-01** — Pasos: Repetir el script (cualquier rol) con el mismo email. **Esperado:** `Ya existe una cuenta con ese email. No se ha creado ninguna cuenta.` y en Atlas sigue habiendo un solo usuario con ese email
+- [ ] **P-68 · RF-05, RF-04** — Pasos: Iniciar sesión en la web con el admin creado en P-66. **Esperado:** Funciona; el menú de la persona muestra "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión", y **no** se ve la cesta (esto cubre también P-22 para el admin; las páginas del menú darán 404 hasta las fases 2.6 y 3)
+- [ ] **P-69 · RF-05** — Pasos: `docker compose exec web php scripts/crear_cuenta.php comprador`, crear una cuenta (por ejemplo con el email en mayúsculas y con espacios) y entrar con ella en la web. **Esperado:** Se crea con `rol: comprador`, el email queda en minúsculas y el menú es el del comprador
+- [ ] **P-70 · RNF-02** — Pasos: Abrir `http://localhost:8081/scripts/crear_cuenta.php` en el navegador. **Esperado:** 404 (el script está fuera de `public/` y no tiene URL)
+- [ ] **P-71 · RF-05** — Pasos: Lanzar el script y cortarlo con Ctrl+C a mitad de las preguntas. **Esperado:** No se crea ninguna cuenta en Atlas

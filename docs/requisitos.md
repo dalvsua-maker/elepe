@@ -88,9 +88,9 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| 0 | Preparación: repositorio, Docker, Composer, `.env` y conexión con Atlas | En curso (06/11/2026): hechos los pasos 0.1 a 0.4 |
-| 1 | Base común: clases de `src/`, Bootstrap local, estilos, cabecera, pie e `index.php` | Pendiente |
-| 2 | Cuentas: registro, login, logout, script `crear_cuenta` y "Mis datos" | Pendiente |
+| 0 | Preparación: repositorio, Docker, Composer, `.env` y conexión con Atlas | Cerrada (06/11/2026) |
+| 1 | Base común: clases de `src/`, Bootstrap local, estilos, cabecera, pie e `index.php` | Cerrada (07/11/2026) |
+| 2 | Cuentas: registro, login, logout, script `crear_cuenta` y "Mis datos" | En curso (registro, login, logout y `crear_cuenta` hechos) |
 | 3 | Admin: discos | Pendiente |
 | 4 | Tienda | Pendiente |
 | 5 | Cesta | Pendiente |

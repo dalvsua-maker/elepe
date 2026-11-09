@@ -8,6 +8,9 @@ if (Sesion::rol() !== 'visitante') {
     exit;
 }
 
+/* Conserva "volver" en el enlace a iniciar sesión, para no perder el camino de vuelta a la cesta */
+$volver = is_string($_GET['volver'] ?? null) ? '?volver=' . urlencode($_GET['volver']) : '';
+
 $titulo = 'Registrarse · Elepe';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
@@ -58,13 +61,12 @@ require __DIR__ . '/../src/partes/cabecera.php';
           <button type="submit" id="boton-registro" class="btn btn-primary mt-4">Registrarse</button>
         </form>
 
-        <p class="mt-4 mb-0">¿Ya tienes cuenta? <a href="/iniciar_sesion.php">Inicia sesión</a></p>
+        <p class="mt-4 mb-0">¿Ya tienes cuenta? <a href="/iniciar_sesion.php<?= htmlspecialchars($volver) ?>">Inicia sesión</a></p>
       </div>
     </div>
   </div>
 </section>
 
-<script src="/js/api.js" defer></script>
 <script src="/js/registro.js" defer></script>
 
 <?php require __DIR__ . '/../src/partes/pie.php'; ?>

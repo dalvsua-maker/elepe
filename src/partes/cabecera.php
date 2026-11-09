@@ -13,6 +13,8 @@ $rol = Sesion::rol();
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/estilos.css">
   <script src="/js/bootstrap.bundle.min.js" defer></script>
+  <script src="/js/api.js" defer></script>
+  <script src="/js/cabecera.js" defer></script>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
@@ -58,12 +60,12 @@ $rol = Sesion::rol();
                 <?php } elseif ($rol === 'comprador') { ?>
                   <li><a class="dropdown-item" href="/mis_datos.php">Mis datos</a></li>
                   <li><a class="dropdown-item" href="/mis_pedidos.php">Mis pedidos</a></li>
-                  <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
+                  <li><a class="dropdown-item" href="#" id="cerrar-sesion">Cerrar sesión</a></li>
                 <?php } else { ?>
                   <li><a class="dropdown-item" href="/mis_datos.php">Mis datos</a></li>
                   <li><a class="dropdown-item" href="/admin_discos.php">Discos</a></li>
                   <li><a class="dropdown-item" href="/admin_solicitudes.php">Solicitudes</a></li>
-                  <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
+                  <li><a class="dropdown-item" href="#" id="cerrar-sesion">Cerrar sesión</a></li>
                 <?php } ?>
               </ul>
             </li>
