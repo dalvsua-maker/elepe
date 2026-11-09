@@ -37,9 +37,9 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RF-07:** La dirección de entrega (`calle`, `codigoPostal`, `localidad`, `provincia`) se rellena en el perfil y es obligatoria para confirmar un pedido.
 
 ### Tienda
-- **RF-08:** El catálogo tiene 12 discos, 4 géneros (Rock, Jazz, Pop y Electrónica) con 3 discos cada uno.
+- **RF-08:** El catálogo inicial tiene 12 discos, 4 géneros (Rock, Jazz, Pop y Electrónica) con 3 discos cada uno. Los géneros no son una lista fija: el administrador puede crear otros al añadir o editar un disco.
 - **RF-09:** Cada disco se muestra en una ficha con portada, título, artista, género, precio, selector de unidades (de 1 al stock) y botón "Añadir a la cesta". Si no hay stock, muestra "Agotado".
-- **RF-10:** La tienda se puede filtrar por género. El filtro lo hace el servidor.
+- **RF-10:** La tienda se puede filtrar por género. El filtro lo hace el servidor y sus botones salen de los géneros que tienen discos en ese momento.
 - **RF-11:** El visitante puede añadir discos a la cesta igual que un comprador. Al pulsar "Confirmar pedido" ve un modal "Inicia sesión para confirmar tu pedido" con enlaces a iniciar sesión y registrarse, y tras entrar vuelve a la cesta con su contenido.
 
 ### Cesta y pedidos
@@ -52,10 +52,10 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RF-18:** "Volver a comprar" mete los discos de un pedido en la cesta (con las unidades limitadas al stock actual) y lleva a la cesta para revisar y confirmar.
 
 ### Administración
-- **RF-19:** El panel de discos muestra una tabla con portada, título, artista, género, precio y stock, con "Añadir disco", "Editar" y "Eliminar" (con confirmación). Añadir y editar usan el mismo formulario.
-- **RF-20:** El admin escribe el precio en euros; el sistema lo guarda en céntimos.
-- **RF-21:** El admin sube la imagen de cada disco (JPG, PNG o WebP, máximo 500 KB), que se guarda en Atlas.
-- **RF-22:** No se puede eliminar un disco que esté en un pedido pendiente.
+- **RF-19:** El panel de discos muestra una tabla con portada, título, artista, género, precio y stock, con "Añadir disco", "Editar" y "Eliminar" (con confirmación). Añadir y editar usan el mismo formulario. Los datos se validan en JS y en PHP: título y artista de 1 a 60 caracteres, año entre 1900 y el año actual, género de 2 a 30 caracteres (se elige uno existente o se escribe uno nuevo con "Otro género…"), descripción de 10 a 300 caracteres y stock de 0 a 999. No puede haber dos discos con el mismo título y artista.
+- **RF-20:** El admin escribe el precio en euros (de 0,01 a 500 €, con coma o punto y como mucho 2 decimales); el sistema lo guarda en céntimos.
+- **RF-21:** El admin puede subir la portada de cada disco (opcional; JPG, PNG o WebP, máximo 500 KB), que se guarda en Atlas. Un disco sin portada muestra un icono de disco genérico. Al editar, si no se elige otra portada se conserva la que tenía.
+- **RF-22:** No se puede eliminar un disco que esté en un pedido pendiente (esta comprobación llega con los pedidos, en la fase 6).
 - **RF-23:** El panel de solicitudes tiene las pestañas *Pendientes* y *Procesadas*. Cada solicitud muestra comprador, fecha, dirección, discos con unidades y total, y los botones "Aceptar" y "Rechazar".
 - **RF-24:** Al rechazar se elige un motivo de una lista fija ("Sin stock real", "Dirección incorrecta o incompleta", "Datos de contacto incorrectos", "Otro") y un detalle de 0 a 200 caracteres, obligatorio solo con "Otro". Rechazar devuelve el stock.
 - **RF-25:** Aceptar o rechazar solo funciona si el pedido sigue `pendiente`, para que un doble clic no repita la operación.
@@ -90,8 +90,8 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 |---|---|---|
 | 0 | Preparación: repositorio, Docker, Composer, `.env` y conexión con Atlas | Cerrada (06/11/2026) |
 | 1 | Base común: clases de `src/`, Bootstrap local, estilos, cabecera, pie e `index.php` | Cerrada (07/11/2026) |
-| 2 | Cuentas: registro, login, logout, script `crear_cuenta` y "Mis datos" | En curso (registro, login, logout y `crear_cuenta` hechos) |
-| 3 | Admin: discos | Pendiente |
+| 2 | Cuentas: registro, login, logout, script `crear_cuenta` y "Mis datos" | Cerrada (09/11/2026) |
+| 3 | Admin: discos (con portadas en Atlas y los 12 discos iniciales) | Cerrada (09/11/2026) |
 | 4 | Tienda | Pendiente |
 | 5 | Cesta | Pendiente |
 | 6 | Pedidos y solicitudes | Pendiente |

@@ -5,7 +5,7 @@
 - **Arquitectura:** páginas `.php` que montan el HTML (la cabecera según el rol, leído de la sesión) y datos por `fetch` a `api/` en JSON. PHP decide y protege; JS muestra y avisa.
 - **Piezas reutilizadas de un proyecto anterior:** `BaseDeDatos`, `Respuesta`, `Validador` y `pedirJson()`, más una clase nueva `Sesion`.
 - **Nombres en español:** colecciones, campos y valores de Mongo, variables y funciones, sin tildes ni ñ en los nombres (`anio`, `contrasena`). Los valores sí pueden llevarlas (`"Electrónica"`).
-- **Dinero:** entero en céntimos (`precioCentimos`, `totalCentimos`); el admin escribe euros y PHP convierte con `round($euros * 100)`.
+- **Dinero:** entero en céntimos (`precioCentimos`, `totalCentimos`); el admin escribe euros y PHP separa euros y céntimos como texto (`24,99` → `2499`), sin decimales de coma flotante.
 - **Imágenes:** se guardan en Atlas (colección `imagenes`), no en disco, porque el disco de un servicio gratuito se pierde en cada reinicio.
 - **Stock:** se descuenta al confirmar el pedido, no al añadir a la cesta; si el admin rechaza el pedido, se devuelve.
 - **Visitante y cesta:** el visitante puede añadir a la cesta (que vive en su sesión de PHP), pero solo el comprador puede confirmar el pedido. Como la cesta no descuenta stock, una cesta abandonada no bloquea discos.
@@ -18,7 +18,8 @@ TiendaOnline/
 │   ├── index.php, tienda.php, contacto.php, gracias.php
 │   ├── iniciar_sesion.php, registro.php
 │   ├── cesta.php                                        (visitante y comprador)
-│   ├── mis_datos.php, mis_pedidos.php                   (comprador)
+│   ├── mis_datos.php                                    (comprador y admin)
+│   ├── mis_pedidos.php                                  (comprador)
 │   ├── admin_discos.php, admin_solicitudes.php          (admin)
 │   ├── css/    bootstrap.min.css, estilos.css
 │   ├── js/     bootstrap.bundle.min.js, api.js, cabecera.js, un .js por página
@@ -29,7 +30,7 @@ TiendaOnline/
 │   ├── config.php, BaseDeDatos.php, Respuesta.php, Validador.php
 │   ├── Sesion.php
 │   └── partes/ cabecera.php, pie.php
-├── scripts/ preparar_bd.php, crear_cuenta.php   ← fuera de public/
+├── scripts/ preparar_bd.php, crear_cuenta.php, cargar_discos.php   ← fuera de public/
 ├── docs/   requisitos, disenyo, contrato, pruebas
 └── Dockerfile, docker-compose.yml, .dockerignore, .gitignore,
     .env, .env.example, composer.json, composer.lock, README.md
@@ -65,13 +66,13 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 | Colección | Campos |
 |---|---|
 | `usuarios` | `nombre`, `apellidos`, `email` (índice único), `telefono`, `hashContrasena`, `rol`, `direccion` (`calle`, `codigoPostal`, `localidad`, `provincia`, o `null`), `creadoEn` |
-| `productos` | `titulo`, `artista`, `anio`, `genero`, `descripcion`, `precioCentimos`, `stock`, `idImagen`, `creadoEn` |
+| `productos` | `titulo`, `artista` (índice único sobre los dos: no hay dos discos iguales), `anio`, `genero`, `descripcion`, `precioCentimos`, `stock`, `idImagen` (texto, o `null` si no tiene portada), `creadoEn` |
 | `imagenes` | `tipoContenido`, `datos` (bytes), `creadoEn` |
 | `pedidos` | `idUsuario`, `comprador` (copia de `nombre`, `apellidos`, `email`, `telefono`), `direccion` (copia), `lineas`, `totalCentimos`, `estado`, `motivoRechazo`, `detalleRechazo`, `creadoEn`, `resueltoEn` |
 | `formularios` | `nombre`, `email`, `asunto`, `mensaje`, `idUsuario` (si había sesión), `creadoEn` |
 
 - Cada elemento de `lineas` lleva `idProducto`, `titulo`, `artista`, `precioCentimos` y `unidades`: es la copia del momento de la compra, así el historial y el panel se pintan sin volver a consultar `productos` ni `usuarios`.
-- **Valores:** `estado` ∈ {`pendiente`, `aceptado`, `rechazado`}; `rol` ∈ {`comprador`, `admin`}; `genero` ∈ {"Rock", "Jazz", "Pop", "Electrónica"}.
+- **Valores:** `estado` ∈ {`pendiente`, `aceptado`, `rechazado`}; `rol` ∈ {`comprador`, `admin`}; `genero` es texto libre de 2 a 30 caracteres (los de la carga inicial son "Rock", "Jazz", "Pop" y "Electrónica"; el administrador puede crear más).
 - **Estados del pedido:** `pendiente` → `aceptado` o `rechazado`. No hay más: el comprador no cancela.
 
 ## 5. Flujo de compra y stock

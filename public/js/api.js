@@ -33,3 +33,14 @@ function enviarJson(url, datos) {
     body: JSON.stringify(datos),
   });
 }
+
+/**
+ * Envía un formulario con archivos (FormData) con POST. El navegador pone solo la cabecera
+ * Content-Type, con el separador de las partes.
+ * @param {string} url
+ * @param {FormData} datos
+ * @returns {Promise<object>}
+ */
+function enviarFormulario(url, datos) {
+  return pedirJson(url, { method: "POST", body: datos });
+}

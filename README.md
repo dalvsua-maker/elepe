@@ -2,7 +2,7 @@
 
 Tienda online de discos y vinilos para navegador. Tiene una landing, una tienda con filtro por género, contacto, cuentas de comprador (cesta, pedidos y su historial) y un panel de administración para gestionar los discos y aceptar o rechazar las solicitudes de compra.
 
-**Estado:** en desarrollo (fase 2 de 9: cuentas). Este README se irá completando.
+**Estado:** en desarrollo (fase 4 de 9: tienda). Este README se irá completando.
 
 ## Tecnologías
 
@@ -24,7 +24,7 @@ Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base
    ```
    docker compose exec web composer install
    ```
-4. Prepara la base de datos (crea los índices; solo hace falta una vez y se puede repetir):
+4. Prepara la base de datos (crea los índices; se puede repetir sin problema y conviene ejecutarlo de nuevo cuando se añade un índice, como el de los discos):
    ```
    docker compose exec web php scripts/preparar_bd.php
    ```
@@ -37,7 +37,11 @@ Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base
    ```
    docker compose exec web php scripts/crear_cuenta.php admin
    ```
-7. La web estará en `http://localhost:8081`.
+7. Carga los 12 discos iniciales (sin portada; se pueden repetir sin duplicarse, y las portadas se suben después desde el panel de discos):
+   ```
+   docker compose exec web php scripts/cargar_discos.php
+   ```
+8. La web estará en `http://localhost:8081`.
 
 Si cambias el `.env`, recrea el contenedor con `docker compose up -d --force-recreate`.
 
@@ -56,7 +60,7 @@ El archivo `.env` contiene credenciales y **nunca se sube a Git** (está en `.gi
 Dockerfile, docker-compose.yml  Imagen (desarrollo y producción) y arranque local
 public/            Lo único accesible desde el navegador (páginas, css, js, img, api)
 src/               PHP interno: configuración, conexión con Atlas, sesiones y validación
-scripts/           Scripts de terminal (preparar la base de datos y crear cuentas)
+scripts/           Scripts de terminal (preparar la base de datos, crear cuentas y cargar los discos iniciales)
 docs/              Documentación del proyecto
 ```
 
