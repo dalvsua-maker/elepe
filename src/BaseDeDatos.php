@@ -271,6 +271,53 @@ class BaseDeDatos
     }
 
     /**
+     * Resta unidades del stock de un disco solo si hay suficientes. Es una única operación de Mongo,
+     * así que dos compras a la vez no pueden dejar el stock en negativo.
+     *
+     * @param string $idProducto Id válido (ver Validador::id).
+     * @param int    $unidades   Unidades que se compran.
+     * @return bool false si no había stock suficiente (o el disco ya no existe): no se ha restado nada.
+     */
+    public static function descontarStock(string $idProducto, int $unidades): bool
+    {
+        $resultado = self::coleccion('productos')->updateOne(
+            ['_id' => new ObjectId($idProducto), 'stock' => ['$gte' => $unidades]],
+            ['$inc' => ['stock' => -$unidades]]
+        );
+
+        return $resultado->getModifiedCount() === 1;
+    }
+
+    /**
+     * Devuelve al stock las unidades de unas líneas: al deshacer un pedido a medias o al rechazar uno.
+     * Si un disco ya no existe, su línea no cambia nada.
+     *
+     * @param array[] $lineas Líneas con "idProducto" y "unidades".
+     */
+    public static function devolverStock(array $lineas): void
+    {
+        foreach ($lineas as $linea) {
+            self::coleccion('productos')->updateOne(
+                ['_id' => new ObjectId($linea['idProducto'])],
+                ['$inc' => ['stock' => $linea['unidades']]]
+            );
+        }
+    }
+
+    /**
+     * Guarda un pedido nuevo.
+     *
+     * @param array $pedido Documento completo del pedido.
+     * @return string Id del pedido creado.
+     */
+    public static function crearPedido(array $pedido): string
+    {
+        $resultado = self::coleccion('pedidos')->insertOne($pedido);
+
+        return (string) $resultado->getInsertedId();
+    }
+
+    /**
      * Cambia campos de un disco. Los nombres de campo los decide el servidor, nunca el navegador.
      *
      * @param string $idProducto Id válido (ver Validador::id).

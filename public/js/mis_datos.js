@@ -1,8 +1,10 @@
-/* Elementos de la página. Los de la dirección son null si no existen (el admin no tiene dirección) */
+/* Elementos de la página. Los de la dirección son null si no existen (el admin no tiene dirección),
+   y volverCesta solo existe si el comprador llega desde la cesta */
 const ui = {
   formulario: document.getElementById("formulario-datos"),
   aviso: document.getElementById("aviso"),
   exito: document.getElementById("exito"),
+  volverCesta: document.getElementById("volver-cesta"),
   boton: document.getElementById("boton-guardar"),
   campos: {
     nombre: document.getElementById("nombre"),
@@ -129,6 +131,9 @@ async function guardarPerfil(evento) {
   evento.preventDefault();
   ui.aviso.classList.add("d-none");
   ui.exito.classList.add("d-none");
+  if (ui.volverCesta !== null) {
+    ui.volverCesta.classList.add("d-none");
+  }
 
   if (!validarFormulario()) {
     return;
@@ -153,7 +158,12 @@ async function guardarPerfil(evento) {
   ui.boton.disabled = false;
 
   if (respuesta.ok) {
-    ui.exito.classList.remove("d-none");
+    /* Si viene de la cesta y ya ha guardado una dirección, se le ofrece volver a ella */
+    if (ui.volverCesta !== null && !direccionVacia()) {
+      ui.volverCesta.classList.remove("d-none");
+    } else {
+      ui.exito.classList.remove("d-none");
+    }
     return;
   }
 

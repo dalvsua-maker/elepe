@@ -8,6 +8,9 @@ Sesion::exigirRolPagina(['comprador', 'admin']);
 /* La dirección de entrega solo la tiene el comprador */
 $esComprador = Sesion::rol() === 'comprador';
 
+/* Viene de la cesta porque le falta la dirección: solo se compara con un valor fijo, nunca se escribe en la página */
+$vieneDeLaCesta = $esComprador && ($_GET['volver'] ?? '') === 'cesta';
+
 $titulo = 'Mis datos · Elepe';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
@@ -18,6 +21,13 @@ require __DIR__ . '/../src/partes/cabecera.php';
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">
         <h1 class="h2 mb-4">Mis datos</h1>
+
+        <?php if ($vieneDeLaCesta) { ?>
+          <!-- Aviso para el comprador que llega desde la cesta sin dirección -->
+          <div class="alert alert-warning" role="status">
+            Para confirmar tu pedido necesitamos tu dirección de entrega. Rellénala abajo y guarda los cambios.
+          </div>
+        <?php } ?>
 
         <form id="formulario-datos" novalidate>
           <div class="row g-3">
@@ -74,6 +84,14 @@ require __DIR__ . '/../src/partes/cabecera.php';
 
           <div id="aviso" class="alert alert-danger mt-3 d-none" role="alert"></div>
           <div id="exito" class="alert alert-success mt-3 d-none" role="status">Cambios guardados.</div>
+
+          <?php if ($vieneDeLaCesta) { ?>
+            <!-- Cuando guarde una dirección, puede volver a la cesta a confirmar -->
+            <div id="volver-cesta" class="alert alert-success mt-3 d-none" role="status">
+              <p class="mb-2">Dirección guardada. Ya puedes confirmar tu pedido.</p>
+              <a class="btn btn-primary btn-sm" href="/cesta.php">Volver a la cesta</a>
+            </div>
+          <?php } ?>
 
           <button type="submit" id="boton-guardar" class="btn btn-primary mt-4" disabled>Guardar cambios</button>
         </form>

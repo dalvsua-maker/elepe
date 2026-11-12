@@ -1,6 +1,6 @@
 # Elepe — Plan de pruebas
 
-Estado: **fase 5 cerrada (12/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
+Estado: **fase 5 cerrada (12/11/2026); fase 6 en curso**. Este documento se completa en cada fase con los casos de lo que se va implementando.
 
 Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http://localhost:8081`. Cuando un caso sale bien, se marca cambiando `[ ]` por `[x]`. Si falla, se deja `[ ]` y se añade debajo una nota con ❌ y lo que pasó.
 
@@ -180,3 +180,19 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-154 · RNF-04** — Pasos: Abrir `http://localhost:8081/api/cambiar_cesta.php` y `.../api/quitar_cesta.php` en el navegador (GET), y hacer un POST a `.../api/cesta.php`. **Esperado:** `METODO_NO_PERMITIDO` (405) en los tres
 - [ ] **P-155 · RNF-07** — Pasos: Con Atlas sin acceso, abrir la cesta con algo dentro. **Esperado:** Aviso rojo "No podemos acceder a tu cesta ahora mismo..."
 - [ ] **P-156 · RNF-08** — Pasos: Con F12 → Console abierta, recorrer la cesta (cambiar, quitar, provocar un aviso) y repetir con la ventana estrecha. **Esperado:** Sin errores de JavaScript (los 409 en rojo de la red son respuestas esperadas); en móvil la página no se desplaza a los lados (solo la tabla)
+
+## Fase 6 · Pedidos
+
+- [ ] **P-157 · RF-11** — Pasos: Como visitante con algo en la cesta, pulsar "Confirmar pedido". **Esperado:** Modal "Inicia sesión para confirmar tu pedido" con "Registrarse" e "Iniciar sesión"; no se crea nada en `pedidos`
+- [ ] **P-158 · RF-11** — Pasos: Desde ese modal, pulsar "Iniciar sesión" y entrar como comprador. **Esperado:** Se vuelve a la cesta con los mismos discos
+- [ ] **P-159 · RF-07** — Pasos: Como comprador sin dirección en "Mis datos", pulsar "Confirmar pedido". **Esperado:** Modal "Falta tu dirección de entrega" con "Ir a Mis datos"; no se crea nada
+- [ ] **P-168 · RF-07** — Pasos: Desde ese modal, pulsar "Ir a Mis datos". Guardar primero sin dirección y después con una dirección completa. **Esperado:** Se llega a `mis_datos.php?volver=cesta` con el aviso amarillo "Para confirmar tu pedido necesitamos tu dirección de entrega..."; sin dirección sale "Cambios guardados."; con dirección sale "Dirección guardada. Ya puedes confirmar tu pedido." y el botón "Volver a la cesta", que lleva a la cesta con los mismos discos y ya deja confirmar
+- [ ] **P-169 · RNF-03** — Pasos: Abrir `http://localhost:8081/mis_datos.php?volver=<b>hola</b>` como comprador y `mis_datos.php?volver=cesta` como admin. **Esperado:** En los dos, la página normal, sin el aviso amarillo ni el botón (y sin "hola" en negrita)
+- [ ] **P-160 · RF-15** — Pasos: Como comprador con dirección, con 2 *Thriller* y 1 *Rumours* en la cesta, pulsar "Confirmar pedido". **Esperado:** Modal "¿Confirmar pedido?" con "Vas a pedir 3 unidades por un total de 82,97 €..."; "Cancelar" lo cierra sin crear nada
+- [ ] **P-161 · RF-15, RF-14** — Pasos: Anotar el stock de esos discos en Atlas y pulsar "Confirmar pedido" en el modal. **Esperado:** Se va a `mis_pedidos.php?enviado=1`; en Atlas hay un pedido `pendiente` con `idUsuario`, `comprador`, `direccion`, las dos líneas (título, artista, `precioCentimos`, unidades), `totalCentimos: 8297`, `creadoEn` y `resueltoEn: null`; el stock ha bajado 2 y 1; la cesta queda vacía y sin número en la cabecera
+- [ ] **P-162 · RF-16** — Pasos: Con un disco en la cesta, poner su stock a 0 como admin (en otra ventana) y, sin recargar la cesta, pulsar "Confirmar pedido". **Esperado:** No se abre el modal; aviso amarillo "«...» se ha agotado y lo hemos quitado de tu cesta."
+- [ ] **P-163 · RF-16** — Pasos: Abrir el modal "¿Confirmar pedido?" y, antes de pulsar el botón, bajar como admin el stock de un disco de la cesta por debajo de sus unidades. Pulsar "Confirmar pedido". **Esperado:** Se cierra el modal; aviso rojo "Tu cesta ha cambiado y no hemos enviado el pedido..." y aviso amarillo "Solo quedan N unidades de «...»"; no hay pedido nuevo y el stock de los demás discos no ha cambiado
+- [ ] **P-164 · RNF-04** — Pasos: Sin sesión y como admin, en F12 → Console: `fetch("/api/confirmar_pedido.php", {method: "POST", body: "{}"}).then(r => r.json()).then(console.log)`. **Esperado:** `SIN_SESION` (401) y `SIN_PERMISO` (403)
+- [ ] **P-165 · RF-15** — Pasos: Como comprador con la cesta vacía, el mismo `fetch`. **Esperado:** `CESTA_VACIA` (400)
+- [ ] **P-166 · RF-07** — Pasos: Como comprador sin dirección y con algo en la cesta, el mismo `fetch`. **Esperado:** `FALTA_DIRECCION` (409)
+- [ ] **P-167 · RNF-07** — Pasos: Con el modal "¿Confirmar pedido?" abierto, dejar Atlas sin acceso y pulsar "Confirmar pedido". **Esperado:** Aviso rojo dentro del modal "No podemos acceder a tu cesta ahora mismo..."; no se descuenta stock

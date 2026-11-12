@@ -7,7 +7,22 @@ const ui = {
   contenido: document.getElementById("contenido-cesta"),
   lineas: document.getElementById("lineas-cesta"),
   total: document.getElementById("total-cesta"),
+  botonConfirmar: document.getElementById("boton-confirmar"),
+  modalConfirmar: document.getElementById("modal-confirmar"),
+  textoConfirmar: document.getElementById("texto-confirmar"),
+  avisoConfirmar: document.getElementById("aviso-confirmar"),
+  botonEnviar: document.getElementById("boton-enviar"),
+  modalSesion: document.getElementById("modal-sesion"),
+  modalDireccion: document.getElementById("modal-direccion"),
 };
+
+/* Los modales los controla Bootstrap; aquí se abren y se cierran desde el JS */
+const modalConfirmar = bootstrap.Modal.getOrCreateInstance(ui.modalConfirmar);
+const modalSesion = bootstrap.Modal.getOrCreateInstance(ui.modalSesion);
+const modalDireccion = bootstrap.Modal.getOrCreateInstance(ui.modalDireccion);
+
+/* Lo decide PHP según el rol: solo el comprador puede confirmar */
+const esComprador = ui.contenido.dataset.comprador === "si";
 
 const PORTADA_GENERICA = "/img/disco.svg";
 
@@ -16,6 +31,7 @@ const mensajesError = {
   UNIDADES_INVALIDAS: "Elige un número de unidades válido.",
   NO_ESTA_EN_CESTA: "Ese disco ya no estaba en tu cesta. Hemos actualizado la lista.",
   DISCO_NO_ENCONTRADO: "Ese disco ya no está en la tienda. Hemos actualizado tu cesta.",
+  FALTA_DIRECCION: "Te falta la dirección de entrega: añádela en «Mis datos».",
   BD_NO_DISPONIBLE: "No podemos acceder a tu cesta ahora mismo. Inténtalo en un momento.",
   SIN_CONEXION: "No hay conexión con el servidor. Inténtalo de nuevo.",
 };
@@ -45,6 +61,15 @@ function mostrarAviso(texto) {
  */
 function formatearPrecio(centimos) {
   return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(centimos / 100);
+}
+
+/**
+ * Texto de unas unidades en singular o plural: 1 → "1 unidad", 3 → "3 unidades".
+ * @param {number} unidades
+ * @returns {string}
+ */
+function textoUnidades(unidades) {
+  return unidades === 1 ? "1 unidad" : unidades + " unidades";
 }
 
 /**
@@ -181,7 +206,10 @@ function crearFila(linea) {
   return fila;
 }
 
-/** Pide la cesta al servidor (que la limpia si algo ha cambiado) y la pinta. */
+/**
+ * Pide la cesta al servidor (que la limpia si algo ha cambiado) y la pinta.
+ * @returns {Promise<object|null>} La respuesta, o null si ha fallado.
+ */
 async function cargarCesta() {
   const respuesta = await pedirJson("/api/cesta.php");
   ui.cargando.classList.add("d-none");
@@ -190,7 +218,7 @@ async function cargarCesta() {
     if (!sinPermiso(respuesta.error)) {
       mostrarAviso(textoError(respuesta.error));
     }
-    return;
+    return null;
   }
 
   pintarAvisos(respuesta.avisos);
@@ -202,6 +230,7 @@ async function cargarCesta() {
 
   ui.lineas.replaceChildren(...respuesta.lineas.map(crearFila));
   ui.total.textContent = formatearPrecio(respuesta.totalCentimos);
+  return respuesta;
 }
 
 /**
@@ -261,4 +290,87 @@ async function quitarDisco(linea, boton) {
   await cargarCesta();
 }
 
+/**
+ * "Confirmar pedido": el visitante ve el modal de iniciar sesión; al comprador se le comprueban la cesta
+ * y la dirección y se le pide confirmación con el total de ese momento.
+ */
+async function pedirConfirmacion() {
+  ui.aviso.classList.add("d-none");
+
+  if (!esComprador) {
+    modalSesion.show();
+    return;
+  }
+
+  ui.botonConfirmar.disabled = true;
+
+  /* Se vuelve a leer la cesta: el total del modal es el de ahora y, si algo ha cambiado, se ve antes */
+  const cesta = await cargarCesta();
+  if (cesta === null || cesta.avisos.length > 0 || cesta.lineas.length === 0) {
+    ui.botonConfirmar.disabled = false;
+    return;
+  }
+
+  /* Sin dirección no se puede enviar: se avisa antes de pedir confirmación */
+  const perfil = await pedirJson("/api/perfil.php");
+  ui.botonConfirmar.disabled = false;
+
+  if (!perfil.ok) {
+    if (perfil.error === "SIN_SESION") {
+      window.location.href = "/iniciar_sesion.php?volver=cesta";
+      return;
+    }
+    mostrarAviso(textoError(perfil.error));
+    return;
+  }
+
+  if (perfil.perfil.direccion === null) {
+    modalDireccion.show();
+    return;
+  }
+
+  ui.textoConfirmar.textContent =
+    "Vas a pedir " + textoUnidades(cesta.unidadesCesta) + " por un total de " + formatearPrecio(cesta.totalCentimos) +
+    ". Revisaremos tu pedido y verás su estado en «Mis pedidos».";
+  ui.avisoConfirmar.classList.add("d-none");
+  modalConfirmar.show();
+}
+
+/** Envía el pedido. Si va bien, lleva a "Mis pedidos"; si la cesta ha cambiado, la enseña con sus avisos. */
+async function enviarPedido() {
+  ui.avisoConfirmar.classList.add("d-none");
+
+  ui.botonEnviar.disabled = true;
+  const respuesta = await enviarJson("/api/confirmar_pedido.php", {});
+  ui.botonEnviar.disabled = false;
+
+  if (respuesta.ok) {
+    window.location.href = "/mis_pedidos.php?enviado=1";
+    return;
+  }
+
+  if (respuesta.error === "SIN_SESION") {
+    window.location.href = "/iniciar_sesion.php?volver=cesta";
+    return;
+  }
+  if (sinPermiso(respuesta.error)) {
+    return;
+  }
+
+  /* La cesta ha cambiado mientras se confirmaba (agotado, menos stock...): no se ha creado nada */
+  if (respuesta.error === "CESTA_CAMBIADA" || respuesta.error === "CESTA_VACIA") {
+    modalConfirmar.hide();
+    pintarAvisos(respuesta.avisos ?? []);
+    mostrarAviso("Tu cesta ha cambiado y no hemos enviado el pedido. Revísala y vuelve a confirmar.");
+    await cargarCesta();
+    return;
+  }
+
+  /* Otros errores (sin dirección, Atlas caído...): se explican dentro del modal */
+  ui.avisoConfirmar.textContent = textoError(respuesta.error);
+  ui.avisoConfirmar.classList.remove("d-none");
+}
+
+ui.botonConfirmar.addEventListener("click", pedirConfirmacion);
+ui.botonEnviar.addEventListener("click", enviarPedido);
 cargarCesta();

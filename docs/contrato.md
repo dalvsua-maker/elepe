@@ -150,3 +150,12 @@ Quita un disco de la cesta. Si no estaba, no cambia nada y responde igual (un do
 - **Entrada (JSON):** `idProducto`.
 - **200:** `{"ok": true, "unidadesCesta": 2}`.
 - **Errores:** 400 `DATOS_INVALIDOS`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`.
+
+### POST /api/confirmar_pedido.php
+
+Convierte la cesta en un pedido `pendiente`. Revisa la cesta con Atlas; si ha cambiado algo, no crea nada. Descuenta el stock línea a línea (si una línea falla, devuelve lo ya descontado), guarda el pedido con copia de los datos del comprador, la dirección y las líneas, y vacía la cesta.
+
+- **Quién:** solo el comprador (401 al visitante, 403 al administrador).
+- **Entrada:** ninguna (JSON vacío `{}`); la cesta y el comprador salen de la sesión.
+- **201:** `{"ok": true, "idPedido": "..."}`.
+- **Errores:** 400 `CESTA_VACIA`; 401 `SIN_SESION` (también si la cuenta ya no existe); 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 409 `FALTA_DIRECCION` o `CESTA_CAMBIADA` (con `avisos`, como los de `cesta.php`, y `unidadesCesta`: la cesta ya queda corregida y no se crea ningún pedido); 503 `BD_NO_DISPONIBLE`.
