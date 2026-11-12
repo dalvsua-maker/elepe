@@ -370,6 +370,67 @@ class BaseDeDatos
     }
 
     /**
+     * Lista los pedidos pendientes de todos los compradores, los más antiguos primero (por orden de llegada).
+     *
+     * @return array[] Pedidos con "_id" y las fechas como texto.
+     */
+    public static function listarPedidosPendientes(): array
+    {
+        $pedidos = self::coleccion('pedidos')->find(
+            ['estado' => 'pendiente'],
+            [
+                'sort' => ['creadoEn' => 1, '_id' => 1],
+                'typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array'],
+            ]
+        )->toArray();
+
+        return array_map(fn ($pedido) => self::prepararPedido($pedido), $pedidos);
+    }
+
+    /**
+     * Lista los pedidos ya aceptados o rechazados, los resueltos más recientemente primero.
+     *
+     * @return array[] Pedidos con "_id" y las fechas como texto.
+     */
+    public static function listarPedidosResueltos(): array
+    {
+        $pedidos = self::coleccion('pedidos')->find(
+            ['estado' => ['$in' => ['aceptado', 'rechazado']]],
+            [
+                'sort' => ['resueltoEn' => -1, '_id' => -1],
+                'typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array'],
+            ]
+        )->toArray();
+
+        return array_map(fn ($pedido) => self::prepararPedido($pedido), $pedidos);
+    }
+
+    /**
+     * Acepta o rechaza un pedido, solo si sigue pendiente. Es una única operación de Mongo:
+     * un doble clic o dos pestañas del admin no pueden resolverlo dos veces.
+     *
+     * @param string      $idPedido Id válido (ver Validador::id).
+     * @param string      $estado   "aceptado" o "rechazado".
+     * @param string|null $motivo   Motivo del rechazo (null al aceptar).
+     * @param string|null $detalle  Detalle del rechazo (null al aceptar).
+     * @return bool false si el pedido no existe o ya no estaba pendiente: no se ha cambiado nada.
+     */
+    public static function resolverPedido(string $idPedido, string $estado, ?string $motivo, ?string $detalle): bool
+    {
+        $resultado = self::coleccion('pedidos')->updateOne(
+            ['_id' => new ObjectId($idPedido), 'estado' => 'pendiente'],
+            ['$set' => [
+                'estado'         => $estado,
+                'motivoRechazo'  => $motivo,
+                'detalleRechazo' => $detalle,
+                'resueltoEn'     => new UTCDateTime(),
+            ]]
+        );
+
+        return $resultado->getModifiedCount() === 1;
+    }
+
+    /**
      * Cambia campos de un disco. Los nombres de campo los decide el servidor, nunca el navegador.
      *
      * @param string $idProducto Id válido (ver Validador::id).

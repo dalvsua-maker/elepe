@@ -176,3 +176,29 @@ Mete en la cesta los discos de un pedido aceptado o rechazado del comprador. Se 
 - **Entrada (JSON):** `idPedido`.
 - **200:** `{"ok": true, "anyadidas": 3, "unidadesCesta": 5, "avisos": [...]}`. Cada aviso es `{"tipo": "ELIMINADO", "titulo"}`, `{"tipo": "AGOTADO", "titulo"}` o `{"tipo": "AJUSTADO", "titulo", "anyadidas"}` (solo cupo una parte, o ninguna).
 - **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `PEDIDO_NO_ENCONTRADO` (no existe o es de otro usuario); 405 `METODO_NO_PERMITIDO`; 409 `PEDIDO_PENDIENTE`; 503 `BD_NO_DISPONIBLE`.
+
+### GET /api/solicitudes.php
+
+Lista las solicitudes para el panel del administrador.
+
+- **Quién:** solo el administrador (401 sin sesión, 403 con otro rol).
+- **200:** `{"ok": true, "motivos": ["Sin stock real", "Dirección incorrecta o incompleta", "Datos de contacto incorrectos", "Otro"], "pendientes": [...], "resueltos": [...]}`. `pendientes`, de la más antigua a la más nueva; `resueltos` (aceptados y rechazados), de la resuelta más recientemente a la más antigua. Cada pedido: `{"id", "creadoEn", "resueltoEn", "estado", "comprador": {"nombre", "apellidos", "email", "telefono"}, "direccion", "lineas", "totalCentimos", "motivoRechazo", "detalleRechazo"}` (fechas en texto ISO 8601; `resueltoEn` es `null` si está pendiente).
+- **Errores:** 401 `SIN_SESION`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/aceptar_pedido.php
+
+Acepta un pedido pendiente. No toca el stock (ya se descontó al confirmar).
+
+- **Quién:** solo el administrador.
+- **Entrada (JSON):** `idPedido`.
+- **200:** `{"ok": true}`.
+- **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `PEDIDO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `PEDIDO_YA_RESUELTO` (ya estaba aceptado o rechazado; no cambia nada); 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/rechazar_pedido.php
+
+Rechaza un pedido pendiente con un motivo y devuelve su stock.
+
+- **Quién:** solo el administrador.
+- **Entrada (JSON):** `idPedido`, `motivo` (uno de la lista de `solicitudes.php`) y `detalle` (de 0 a 200 caracteres; obligatorio si el motivo es `Otro`; si no llega, se toma vacío y se guarda `null`).
+- **200:** `{"ok": true}`.
+- **Errores:** 400 `DATOS_INVALIDOS`, `MOTIVO_INVALIDO` o `DETALLE_INVALIDO`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `PEDIDO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `PEDIDO_YA_RESUELTO` (no cambia nada ni devuelve stock); 503 `BD_NO_DISPONIBLE`.

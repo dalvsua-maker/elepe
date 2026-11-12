@@ -99,3 +99,9 @@ h3,
   font-family: var(--bs-body-font-family);
   font-weight: 400;
 }
+
+/* Pestañas de las solicitudes: el texto en ámbar, sin el azul de Bootstrap */
+.nav-tabs {
+  --bs-nav-link-color: var(--acento);
+  --bs-nav-link-hover-color: var(--acento-oscuro);
+}

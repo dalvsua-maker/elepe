@@ -15,6 +15,14 @@ class Validador
     /** Precio máximo de un disco en céntimos (500 €) */
     public const PRECIO_MAX_CENTIMOS = 50000;
 
+    /** Motivos para rechazar un pedido. Es el único sitio donde se listan (el JS los recibe del servidor) */
+    public const MOTIVOS_RECHAZO = [
+        'Sin stock real',
+        'Dirección incorrecta o incompleta',
+        'Datos de contacto incorrectos',
+        'Otro',
+    ];
+
     /**
      * Nombre o apellidos: de 3 a 30 letras (con tildes y ñ) y espacios.
      *
@@ -314,6 +322,35 @@ class Validador
         $unidades = self::stock($valor);
 
         return $unidades !== null && $unidades >= 1 ? $unidades : null;
+    }
+
+    /**
+     * Motivo de rechazo de un pedido: uno de la lista MOTIVOS_RECHAZO, escrito igual.
+     *
+     * @param mixed $valor
+     * @return string|null
+     */
+    public static function motivoRechazo(mixed $valor): ?string
+    {
+        return is_string($valor) && in_array($valor, self::MOTIVOS_RECHAZO, true) ? $valor : null;
+    }
+
+    /**
+     * Detalle del rechazo: texto libre de 0 a 200 caracteres (sin espacios al principio ni al final).
+     * Que sea obligatorio con el motivo "Otro" lo comprueba el endpoint.
+     *
+     * @param mixed $valor
+     * @return string|null El texto limpio (puede ser "" si no hay detalle).
+     */
+    public static function detalleRechazo(mixed $valor): ?string
+    {
+        if (!is_string($valor)) {
+            return null;
+        }
+
+        $valor = trim($valor);
+
+        return mb_strlen($valor) <= 200 ? $valor : null;
     }
 
     /**
