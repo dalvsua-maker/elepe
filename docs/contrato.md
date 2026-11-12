@@ -18,7 +18,9 @@
 | 400 | Datos mal |
 | 401 | Sin sesión, o credenciales incorrectas en el login |
 | 403 | Con sesión pero sin permiso para esa operación |
+| 404 | No existe (un disco o una imagen) |
 | 405 | Método HTTP no permitido |
+| 409 | Choca con lo que hay en el servidor (email ya registrado, disco repetido, stock insuficiente) |
 | 503 | Base de datos no disponible |
 
 ## Operaciones
@@ -113,3 +115,12 @@ Borra un disco y su portada.
 - **Entrada (JSON):** `id`.
 - **200:** `{"ok": true}`.
 - **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`. Cuando existan los pedidos (fase 6), también responderá 409 si el disco está en un pedido pendiente.
+
+### POST /api/anyadir_cesta.php
+
+Añade unidades de un disco a la cesta, que se guarda en la sesión del servidor. Si el disco ya estaba en la cesta, las unidades se suman. No descuenta stock: solo comprueba que haya suficiente (el stock se descuenta al confirmar el pedido).
+
+- **Quién:** visitante y comprador (el administrador no compra: 403). Nunca responde 401.
+- **Entrada (JSON):** `idProducto` y `unidades` (entero de 1 a 999).
+- **200:** `{"ok": true, "enCesta": 3, "unidadesCesta": 5}`. `enCesta` son las unidades de ese disco que hay ahora en la cesta; `unidadesCesta`, el total de unidades de la cesta (el número de la cabecera).
+- **Errores:** 400 `DATOS_INVALIDOS` (no es JSON o `idProducto` no tiene forma de id) o `UNIDADES_INVALIDAS`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `STOCK_INSUFICIENTE`, con `stock` (el de ahora) y `enCesta` (las que ya había), por ejemplo `{"ok": false, "error": "STOCK_INSUFICIENTE", "stock": 1, "enCesta": 1}`: la cesta no cambia; 503 `BD_NO_DISPONIBLE`.

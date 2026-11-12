@@ -48,7 +48,7 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 | Comprador | Mis datos, Mis pedidos |
 | Admin | Mis datos, Discos, Solicitudes |
 
-- **Cabecera:** Inicio · Tienda · Contacto, icono de cesta (con `badge` del número de discos; lo ven el visitante y el comprador, no el admin) e icono de persona (menú desplegable).
+- **Cabecera:** Inicio · Tienda · Contacto, icono de cesta (con `badge` del total de unidades de la cesta; lo ven el visitante y el comprador, no el admin) e icono de persona (menú desplegable).
 - **Menú de la persona:** visitante → "Iniciar sesión" y "Registrarse"; comprador → "Mis datos", "Mis pedidos" y "Cerrar sesión"; admin → "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión".
 - Un usuario con sesión que abre "Iniciar sesión" o "Registrarse" va al inicio.
 

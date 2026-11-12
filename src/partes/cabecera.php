@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../Sesion.php';
 
 $rol = Sesion::rol();
+$unidadesCesta = Sesion::unidadesEnCesta();
 ?>
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
@@ -44,7 +45,11 @@ $rol = Sesion::rol();
             <?php if ($rol !== 'admin') { ?>
               <li class="nav-item">
                 <a class="nav-link" href="/cesta.php">
-                  <img src="/img/cesta.svg" alt="Cesta" width="24" height="24">
+                  <!-- El badge se coloca encima de la esquina del icono; cabecera.js cambia el número al añadir -->
+                  <span class="position-relative d-inline-block">
+                    <img src="/img/cesta.svg" alt="Cesta" width="24" height="24">
+                    <span id="badge-cesta" class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-cesta<?= $unidadesCesta === 0 ? ' d-none' : '' ?>"><span id="numero-cesta"><?= $unidadesCesta ?></span><span class="visually-hidden"> unidades en la cesta</span></span>
+                  </span>
                 </a>
               </li>
             <?php } ?>

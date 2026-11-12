@@ -125,4 +125,41 @@ class Sesion
 
         return '/';
     }
+
+    /**
+     * Cesta de la sesión: lista de líneas con "idProducto" (texto) y "unidades" (entero).
+     * Existe también para el visitante. El precio y el stock no se guardan aquí: se leen siempre de Atlas.
+     *
+     * @return array[]
+     */
+    public static function cesta(): array
+    {
+        self::iniciar();
+
+        return $_SESSION['cesta'] ?? [];
+    }
+
+    /**
+     * Sustituye la cesta de la sesión por la que se pasa.
+     *
+     * @param array[] $cesta Líneas con "idProducto" y "unidades".
+     */
+    public static function guardarCesta(array $cesta): void
+    {
+        self::iniciar();
+        $_SESSION['cesta'] = $cesta;
+    }
+
+    /**
+     * Total de unidades de la cesta: es el número del badge de la cabecera.
+     */
+    public static function unidadesEnCesta(): int
+    {
+        $total = 0;
+        foreach (self::cesta() as $linea) {
+            $total += $linea['unidades'];
+        }
+
+        return $total;
+    }
 }

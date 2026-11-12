@@ -303,6 +303,20 @@ class Validador
     }
 
     /**
+     * Unidades de un disco que se añaden a la cesta: un entero de 1 a 999.
+     * Usa la misma forma que el stock, pero sin aceptar el 0.
+     *
+     * @param mixed $valor Entero (llega en JSON) o texto.
+     * @return int|null
+     */
+    public static function unidades(mixed $valor): ?int
+    {
+        $unidades = self::stock($valor);
+
+        return $unidades !== null && $unidades >= 1 ? $unidades : null;
+    }
+
+    /**
      * Cantidad máxima de resultados que se pide a un listado: de 1 a 50.
      *
      * @param mixed $valor

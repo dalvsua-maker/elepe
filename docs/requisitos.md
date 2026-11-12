@@ -38,12 +38,12 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 
 ### Tienda
 - **RF-08:** El catálogo inicial tiene 12 discos, 4 géneros (Rock, Jazz, Pop y Electrónica) con 3 discos cada uno. Los géneros no son una lista fija: el administrador puede crear otros al añadir o editar un disco.
-- **RF-09:** Cada disco se muestra en una ficha con portada, título, artista, género, precio, selector de unidades (de 1 al stock) y botón "Añadir a la cesta". Si no hay stock, muestra "Agotado".
+- **RF-09:** Cada disco se muestra en una ficha con portada, título, artista, año, género, descripción, precio, selector de unidades (de 1 al stock) y botón "Añadir a la cesta". Si no hay stock, muestra "Agotado". El administrador ve la tienda, pero sin el botón de añadir.
 - **RF-10:** La tienda se puede filtrar por género. El filtro lo hace el servidor y sus botones salen de los géneros que tienen discos en ese momento.
 - **RF-11:** El visitante puede añadir discos a la cesta igual que un comprador. Al pulsar "Confirmar pedido" ve un modal "Inicia sesión para confirmar tu pedido" con enlaces a iniciar sesión y registrarse, y tras entrar vuelve a la cesta con su contenido.
 
 ### Cesta y pedidos
-- **RF-12:** La cesta se guarda en la sesión de PHP (también la del visitante). Al añadir un disco sale un modal "Añadido a la cesta".
+- **RF-12:** La cesta se guarda en la sesión de PHP (también la del visitante). Al añadir un disco sale un modal "Añadido a la cesta" y la cabecera muestra el total de unidades de la cesta. Si el disco ya estaba en la cesta, se suman las unidades; si la suma supera el stock, no se añade nada y se avisa de cuántas quedan.
 - **RF-13:** En la cesta se pueden cambiar las unidades (de 1 al stock), quitar discos y ver el total. Una cesta vacía muestra un mensaje y un botón para ir a la tienda.
 - **RF-14:** Precio y stock se leen siempre de la base de datos; el pedido copia el precio del momento de confirmar.
 - **RF-15:** Antes de enviar el pedido se pide confirmación en un modal. Al confirmar, el stock se descuenta y el pedido queda en estado `pendiente`.
@@ -92,7 +92,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 | 1 | Base común: clases de `src/`, Bootstrap local, estilos, cabecera, pie e `index.php` | Cerrada (07/11/2026) |
 | 2 | Cuentas: registro, login, logout, script `crear_cuenta` y "Mis datos" | Cerrada (09/11/2026) |
 | 3 | Admin: discos (con portadas en Atlas y los 12 discos iniciales) | Cerrada (09/11/2026) |
-| 4 | Tienda | Pendiente |
+| 4 | Tienda (fichas, filtro por género y añadir a la cesta) | Cerrada (12/11/2026) |
 | 5 | Cesta | Pendiente |
 | 6 | Pedidos y solicitudes | Pendiente |
 | 7 | Contacto y "Gracias" | Pendiente |
