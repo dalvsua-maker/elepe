@@ -370,6 +370,21 @@ class BaseDeDatos
     }
 
     /**
+     * Indica si un disco está en algún pedido pendiente (entonces no se puede eliminar).
+     *
+     * @param string $idProducto Id del disco, como texto.
+     */
+    public static function discoEnPedidoPendiente(string $idProducto): bool
+    {
+        $cuantos = self::coleccion('pedidos')->countDocuments(
+            ['estado' => 'pendiente', 'lineas.idProducto' => $idProducto],
+            ['limit' => 1]
+        );
+
+        return $cuantos > 0;
+    }
+
+    /**
      * Lista los pedidos pendientes de todos los compradores, los más antiguos primero (por orden de llegada).
      *
      * @return array[] Pedidos con "_id" y las fechas como texto.

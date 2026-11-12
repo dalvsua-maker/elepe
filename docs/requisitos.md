@@ -46,7 +46,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RF-12:** La cesta se guarda en la sesión de PHP (también la del visitante). Al añadir un disco sale un modal "Añadido a la cesta" y la cabecera muestra el total de unidades de la cesta. Si el disco ya estaba en la cesta, se suman las unidades; si la suma supera el stock, no se añade nada y se avisa de cuántas quedan.
 - **RF-13:** En la cesta se pueden cambiar las unidades (de 1 al stock; se guardan al momento), quitar discos y ver el total. Una cesta vacía muestra un mensaje y un botón para ir a la tienda. Al abrir la cesta, los discos borrados o agotados se quitan y las unidades que superan el stock se ajustan, con un aviso por cada cambio.
 - **RF-14:** Precio y stock se leen siempre de la base de datos; el pedido copia el precio del momento de confirmar.
-- **RF-15:** Antes de enviar el pedido se pide confirmación en un modal. Al confirmar, el stock se descuenta y el pedido queda en estado `pendiente`.
+- **RF-15:** Antes de enviar el pedido se pide confirmación en un modal con el total del momento. Al confirmar, el stock se descuenta y el pedido queda en estado `pendiente`; el comprador va a "Mis pedidos" con el aviso "Pedido enviado". Sin dirección de entrega no se puede confirmar: se avisa y se manda a "Mis datos", desde donde puede volver a la cesta.
 - **RF-16:** Si al confirmar falta stock en alguna línea, no se crea ningún pedido: se avisa de la línea afectada y se ajustan sus unidades.
 - **RF-17:** El historial muestra todos los pedidos del comprador con su estado (Pendiente, Aceptado o Rechazado). Los rechazados muestran el motivo y el detalle.
 - **RF-18:** "Volver a comprar" mete los discos de un pedido en la cesta (con las unidades limitadas al stock actual) y lleva a la cesta para revisar y confirmar.
@@ -55,7 +55,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RF-19:** El panel de discos muestra una tabla con portada, título, artista, género, precio y stock, con "Añadir disco", "Editar" y "Eliminar" (con confirmación). Añadir y editar usan el mismo formulario. Los datos se validan en JS y en PHP: título y artista de 1 a 60 caracteres, año entre 1900 y el año actual, género de 2 a 30 caracteres (se elige uno existente o se escribe uno nuevo con "Otro género…"), descripción de 10 a 300 caracteres y stock de 0 a 999. No puede haber dos discos con el mismo título y artista.
 - **RF-20:** El admin escribe el precio en euros (de 0,01 a 500 €, con coma o punto y como mucho 2 decimales); el sistema lo guarda en céntimos.
 - **RF-21:** El admin puede subir la portada de cada disco (opcional; JPG, PNG o WebP, máximo 500 KB), que se guarda en Atlas. Un disco sin portada muestra un icono de disco genérico. Al editar, si no se elige otra portada se conserva la que tenía.
-- **RF-22:** No se puede eliminar un disco que esté en un pedido pendiente (esta comprobación llega con los pedidos, en la fase 6).
+- **RF-22:** No se puede eliminar un disco que esté en un pedido pendiente (409); los pedidos ya resueltos no lo impiden.
 - **RF-23:** El panel de solicitudes tiene las pestañas *Pendientes* y *Procesadas*. Cada solicitud muestra comprador, fecha, dirección, discos con unidades y total, y los botones "Aceptar" y "Rechazar".
 - **RF-24:** Al rechazar se elige un motivo de una lista fija ("Sin stock real", "Dirección incorrecta o incompleta", "Datos de contacto incorrectos", "Otro") y un detalle de 0 a 200 caracteres, obligatorio solo con "Otro". Rechazar devuelve el stock.
 - **RF-25:** Aceptar o rechazar solo funciona si el pedido sigue `pendiente`, para que un doble clic no repita la operación.
@@ -94,7 +94,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 | 3 | Admin: discos (con portadas en Atlas y los 12 discos iniciales) | Cerrada (09/11/2026) |
 | 4 | Tienda (fichas, filtro por género y añadir a la cesta) | Cerrada (12/11/2026) |
 | 5 | Cesta (ver, cambiar unidades y quitar) | Cerrada (12/11/2026) |
-| 6 | Pedidos y solicitudes | Pendiente |
+| 6 | Pedidos y solicitudes (confirmar, mis pedidos, volver a comprar, solicitudes del admin) | Cerrada (12/11/2026) |
 | 7 | Contacto y "Gracias" | Pendiente |
 | 8 | Landing y pulido visual | Pendiente |
 | 9 | Pruebas, documentación final y despliegue | Pendiente |

@@ -114,7 +114,7 @@ Borra un disco y su portada.
 - **Quién:** solo el administrador (401 sin sesión, 403 con otro rol).
 - **Entrada (JSON):** `id`.
 - **200:** `{"ok": true}`.
-- **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`. Cuando existan los pedidos (fase 6), también responderá 409 si el disco está en un pedido pendiente.
+- **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `DISCO_EN_PEDIDO_PENDIENTE` (el disco está en algún pedido pendiente: no se borra nada); 503 `BD_NO_DISPONIBLE`.
 
 ### POST /api/anyadir_cesta.php
 

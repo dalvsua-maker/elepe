@@ -77,6 +77,8 @@ const mensajesError = {
   IMAGEN_INVALIDA: "La portada tiene que ser JPG, PNG o WebP y pesar como máximo 500 KB.",
   DISCO_REPETIDO: "Ya hay un disco con ese título y ese artista.",
   DISCO_NO_ENCONTRADO: "Ese disco ya no existe. Se ha actualizado la lista.",
+  DISCO_EN_PEDIDO_PENDIENTE:
+    "No se puede eliminar: este disco está en un pedido pendiente. Acepta o rechaza antes ese pedido en «Solicitudes».",
   BD_NO_DISPONIBLE: "No podemos acceder a los discos ahora mismo. Inténtalo en un momento.",
   SIN_CONEXION: "No hay conexión con el servidor. Inténtalo de nuevo.",
 };
