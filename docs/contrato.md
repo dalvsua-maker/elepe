@@ -159,3 +159,20 @@ Convierte la cesta en un pedido `pendiente`. Revisa la cesta con Atlas; si ha ca
 - **Entrada:** ninguna (JSON vacío `{}`); la cesta y el comprador salen de la sesión.
 - **201:** `{"ok": true, "idPedido": "..."}`.
 - **Errores:** 400 `CESTA_VACIA`; 401 `SIN_SESION` (también si la cuenta ya no existe); 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 409 `FALTA_DIRECCION` o `CESTA_CAMBIADA` (con `avisos`, como los de `cesta.php`, y `unidadesCesta`: la cesta ya queda corregida y no se crea ningún pedido); 503 `BD_NO_DISPONIBLE`.
+
+### GET /api/mis_pedidos.php
+
+Lista los pedidos del comprador de la sesión, los más nuevos primero.
+
+- **Quién:** solo el comprador (401 al visitante, 403 al administrador). No recibe ningún id: el usuario sale de la sesión.
+- **200:** `{"ok": true, "pedidos": [{"id", "creadoEn", "estado", "totalCentimos", "direccion", "motivoRechazo", "detalleRechazo", "lineas": [{"idProducto", "titulo", "artista", "precioCentimos", "unidades", "idImagen"}]}]}`. `creadoEn` es texto ISO 8601 (`2026-11-12T20:48:00+00:00`). Título, artista y precio son la copia del momento de la compra; `idImagen` es la portada actual del disco, o `null` si ya no existe o no tiene.
+- **Errores:** 401 `SIN_SESION`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/volver_a_comprar.php
+
+Mete en la cesta los discos de un pedido aceptado o rechazado del comprador. Se suman a lo que ya haya, sin pasar del stock actual; los discos borrados o agotados se saltan. No crea ningún pedido.
+
+- **Quién:** solo el comprador (401 al visitante, 403 al administrador).
+- **Entrada (JSON):** `idPedido`.
+- **200:** `{"ok": true, "anyadidas": 3, "unidadesCesta": 5, "avisos": [...]}`. Cada aviso es `{"tipo": "ELIMINADO", "titulo"}`, `{"tipo": "AGOTADO", "titulo"}` o `{"tipo": "AJUSTADO", "titulo", "anyadidas"}` (solo cupo una parte, o ninguna).
+- **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `PEDIDO_NO_ENCONTRADO` (no existe o es de otro usuario); 405 `METODO_NO_PERMITIDO`; 409 `PEDIDO_PENDIENTE`; 503 `BD_NO_DISPONIBLE`.

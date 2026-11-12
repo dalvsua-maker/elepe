@@ -318,6 +318,58 @@ class BaseDeDatos
     }
 
     /**
+     * Pasa el id de un pedido a texto y sus fechas a texto ISO 8601 (por ejemplo "2026-11-12T20:48:00+00:00"),
+     * para poder enviarlos al navegador.
+     *
+     * @param array $pedido Documento de "pedidos" leído con typeMap de arrays.
+     */
+    private static function prepararPedido(array $pedido): array
+    {
+        $pedido['_id'] = (string) $pedido['_id'];
+        $pedido['creadoEn'] = $pedido['creadoEn']->toDateTime()->format(DATE_ATOM);
+        $pedido['resueltoEn'] = $pedido['resueltoEn'] === null
+            ? null
+            : $pedido['resueltoEn']->toDateTime()->format(DATE_ATOM);
+
+        return $pedido;
+    }
+
+    /**
+     * Lista los pedidos de un usuario, los más nuevos primero.
+     *
+     * @param string $idUsuario Id del usuario, el que guarda la sesión.
+     * @return array[] Pedidos con "_id" y las fechas como texto.
+     */
+    public static function listarPedidosDeUsuario(string $idUsuario): array
+    {
+        $pedidos = self::coleccion('pedidos')->find(
+            ['idUsuario' => $idUsuario],
+            [
+                'sort' => ['creadoEn' => -1, '_id' => -1],
+                'typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array'],
+            ]
+        )->toArray();
+
+        return array_map(fn ($pedido) => self::prepararPedido($pedido), $pedidos);
+    }
+
+    /**
+     * Busca un pedido por su id.
+     *
+     * @param string $idPedido Id válido (ver Validador::id).
+     * @return array|null El pedido (con "_id" y las fechas como texto), o null si no existe.
+     */
+    public static function buscarPedidoPorId(string $idPedido): ?array
+    {
+        $pedido = self::coleccion('pedidos')->findOne(
+            ['_id' => new ObjectId($idPedido)],
+            ['typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array']]
+        );
+
+        return $pedido === null ? null : self::prepararPedido($pedido);
+    }
+
+    /**
      * Cambia campos de un disco. Los nombres de campo los decide el servidor, nunca el navegador.
      *
      * @param string $idProducto Id válido (ver Validador::id).
