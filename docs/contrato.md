@@ -124,3 +124,29 @@ Añade unidades de un disco a la cesta, que se guarda en la sesión del servidor
 - **Entrada (JSON):** `idProducto` y `unidades` (entero de 1 a 999).
 - **200:** `{"ok": true, "enCesta": 3, "unidadesCesta": 5}`. `enCesta` son las unidades de ese disco que hay ahora en la cesta; `unidadesCesta`, el total de unidades de la cesta (el número de la cabecera).
 - **Errores:** 400 `DATOS_INVALIDOS` (no es JSON o `idProducto` no tiene forma de id) o `UNIDADES_INVALIDAS`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `STOCK_INSUFICIENTE`, con `stock` (el de ahora) y `enCesta` (las que ya había), por ejemplo `{"ok": false, "error": "STOCK_INSUFICIENTE", "stock": 1, "enCesta": 1}`: la cesta no cambia; 503 `BD_NO_DISPONIBLE`.
+
+### GET /api/cesta.php
+
+Devuelve la cesta de la sesión con los datos actuales de cada disco (leídos de Atlas). Al leerla la limpia: quita los discos borrados y los agotados, baja las unidades al stock que queda y devuelve un aviso por cada cambio (la cesta corregida queda guardada).
+
+- **Quién:** visitante y comprador (el administrador: 403).
+- **200:** `{"ok": true, "lineas": [{"idProducto", "titulo", "artista", "precioCentimos", "unidades", "stock", "idImagen", "subtotalCentimos"}], "totalCentimos": 5998, "unidadesCesta": 2, "avisos": [...]}`. Cada aviso es `{"tipo": "ELIMINADO"}`, `{"tipo": "AGOTADO", "titulo": "..."}` o `{"tipo": "AJUSTADO", "titulo": "...", "stock": 2}`. Cesta vacía: `lineas` y `avisos` vacíos y totales a 0.
+- **Errores:** 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/cambiar_cesta.php
+
+Cambia las unidades de un disco que ya está en la cesta (las sustituye, no las suma).
+
+- **Quién:** visitante y comprador (el administrador: 403).
+- **Entrada (JSON):** `idProducto` y `unidades` (entero de 1 a 999).
+- **200:** `{"ok": true, "unidadesCesta": 4}`.
+- **Errores:** 400 `DATOS_INVALIDOS` o `UNIDADES_INVALIDAS`; 403 `SIN_PERMISO`; 404 `NO_ESTA_EN_CESTA` (el disco no está en la cesta) o `DISCO_NO_ENCONTRADO` (ya no existe); 405 `METODO_NO_PERMITIDO`; 409 `STOCK_INSUFICIENTE` con `stock` (la cesta no cambia); 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/quitar_cesta.php
+
+Quita un disco de la cesta. Si no estaba, no cambia nada y responde igual (un doble clic no da error). No necesita la base de datos.
+
+- **Quién:** visitante y comprador (el administrador: 403).
+- **Entrada (JSON):** `idProducto`.
+- **200:** `{"ok": true, "unidadesCesta": 2}`.
+- **Errores:** 400 `DATOS_INVALIDOS`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`.

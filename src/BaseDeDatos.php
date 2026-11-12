@@ -210,6 +210,30 @@ class BaseDeDatos
     }
 
     /**
+     * Busca varios discos a la vez (los de la cesta) con una sola consulta.
+     *
+     * @param string[] $idsProducto Ids válidos (ver Validador::id).
+     * @return array<string, array> Discos indexados por su id (como texto). Los que no existen no aparecen.
+     */
+    public static function buscarProductosPorIds(array $idsProducto): array
+    {
+        $ids = array_map(fn ($idProducto) => new ObjectId($idProducto), $idsProducto);
+
+        $productos = self::coleccion('productos')->find(
+            ['_id' => ['$in' => $ids]],
+            ['typeMap' => ['root' => 'array', 'document' => 'array']]
+        );
+
+        $porId = [];
+        foreach ($productos as $producto) {
+            $producto = self::prepararProducto($producto);
+            $porId[$producto['_id']] = $producto;
+        }
+
+        return $porId;
+    }
+
+    /**
      * Lista los discos, los más nuevos primero.
      *
      * @param string|null $genero Solo los de este género, o null para todos.

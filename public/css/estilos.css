@@ -46,6 +46,9 @@ h3,
   --bs-btn-active-bg: var(--acento-oscuro);
   --bs-btn-active-border-color: var(--acento-oscuro);
   --bs-btn-focus-shadow-rgb: 232, 163, 61;
+  --bs-btn-disabled-color: var(--fondo);
+  --bs-btn-disabled-bg: var(--acento);
+  --bs-btn-disabled-border-color: var(--acento);
 }
 
 /* Tarjetas sobre la superficie */
@@ -70,4 +73,9 @@ h3,
 /* Fichas de la tienda: portada cuadrada */
 .ficha-portada {
   aspect-ratio: 1 / 1;
+}
+
+/* Cesta: campo de unidades estrecho */
+.campo-unidades {
+  width: 6rem;
 }

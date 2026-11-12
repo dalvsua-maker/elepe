@@ -1,6 +1,6 @@
 # Elepe — Plan de pruebas
 
-Estado: **fase 4 cerrada (12/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
+Estado: **fase 5 cerrada (12/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
 
 Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http://localhost:8081`. Cuando un caso sale bien, se marca cambiando `[ ]` por `[x]`. Si falla, se deja `[ ]` y se añade debajo una nota con ❌ y lo que pasó.
 
@@ -161,3 +161,22 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-138 · RNF-03** — Pasos: Como admin, crear un disco con el título `<b>hola</b>` y abrir la tienda. **Esperado:** El título se ve tal cual, con los `<b>`, sin negrita
 - [ ] **P-139 · RNF-07** — Pasos: Con Atlas sin acceso (contraseña mala en `.env` y contenedor recreado), abrir la tienda. **Esperado:** Aviso rojo "No podemos acceder a los discos ahora mismo..." y en el filtro solo "Todos"
 - [ ] **P-140 · RNF-08** — Pasos: Con F12 → Console abierta, recorrer la tienda (filtrar, añadir, provocar un "Agotado") y repetir con la ventana estrecha (móvil). **Esperado:** Sin errores de JavaScript (los 409 en rojo de la red son respuestas esperadas); en móvil, una ficha por fila, sin scroll hacia los lados y el número sobre el icono de la cesta en el menú
+
+## Fase 5 · Cesta
+
+- [ ] **P-141 · RF-13** — Pasos: Como visitante sin nada en la cesta, abrir `http://localhost:8081/cesta.php`. **Esperado:** "Tu cesta está vacía. ¿Buscamos algo que escuchar?" y el botón "Ir a la tienda", que lleva a la tienda
+- [ ] **P-142 · RF-13, RF-14** — Pasos: Añadir desde la tienda 2 *Thriller* y 1 *Rumours* y pulsar el icono de la cesta. **Esperado:** Tabla con portada, título y artista, precio, unidades, subtotal (`59,98 €` y `22,99 €`) y "Quitar"; total `82,97 €`; "Confirmar pedido" visible pero desactivado
+- [ ] **P-143 · RF-13** — Pasos: Cambiar las unidades de *Thriller* a 3 y salir del campo (Tab). **Esperado:** El subtotal pasa a `89,97 €`, el total se recalcula y el número de la cesta sube a 4, sin recargar la página
+- [ ] **P-144 · RF-13, RNF-03** — Pasos: Escribir en las unidades un número mayor que el stock, y después `0`, saliendo del campo cada vez (F12 → Network abierto). **Esperado:** El campo sale en rojo con "De 1 a N." y no se envía ninguna petición; el total no cambia
+- [ ] **P-145 · RF-13** — Pasos: Pulsar "Quitar" en *Rumours* y luego en *Thriller*. **Esperado:** La línea desaparece y el total y el número de la cesta se actualizan; al quitar la última aparece "Tu cesta está vacía" y el número de la cesta desaparece
+- [ ] **P-146 · RF-14** — Pasos: Con *Rumours* en la cesta y la página abierta, bajar su stock como admin (en otra ventana) por debajo de las unidades que tienes y, después, intentar subir sus unidades. **Esperado:** Aviso rojo "Solo quedan N unidades de «Rumours»." y el campo vuelve al valor guardado
+- [ ] **P-147 · RF-14** — Pasos: Con 4 *Rumours* en la cesta, poner su stock a 2 como admin y recargar la cesta. **Esperado:** Aviso amarillo "Solo quedan 2 unidades de «Rumours»: hemos ajustado tu cesta." y la línea con 2 unidades; al recargar otra vez, el aviso ya no sale
+- [ ] **P-148 · RF-14** — Pasos: Con un disco en la cesta, poner su stock a 0 como admin y recargar la cesta. **Esperado:** "«...» se ha agotado y lo hemos quitado de tu cesta." y la línea ya no está
+- [ ] **P-149 · RF-14** — Pasos: Con un disco en la cesta, eliminarlo como admin y recargar la cesta. **Esperado:** "Un disco de tu cesta ya no está disponible y se ha quitado." y la línea ya no está
+- [ ] **P-150 · RF-04, RF-11** — Pasos: Con cesta de visitante, abrir "Iniciar sesión" desde `http://localhost:8081/iniciar_sesion.php?volver=cesta` y entrar como comprador. **Esperado:** Se vuelve a la cesta con las mismas líneas
+- [ ] **P-151 · RNF-04** — Pasos: Como admin, abrir `http://localhost:8081/cesta.php` y, en F12 → Console, hacer un `fetch` a `/api/cesta.php`. **Esperado:** La página lleva al inicio; el `fetch` responde `SIN_PERMISO` (403)
+- [ ] **P-152 · RNF-03** — Pasos: Como visitante, en F12 → Console, enviar a `/api/cambiar_cesta.php` un disco que no está en la cesta, uno con `unidades: 0` y uno con más unidades que su stock. **Esperado:** `NO_ESTA_EN_CESTA` (404), `UNIDADES_INVALIDAS` (400) y `STOCK_INSUFICIENTE` con `stock` (409); la cesta no cambia
+- [ ] **P-153 · RNF-03** — Pasos: Enviar dos veces seguidas a `/api/quitar_cesta.php` el mismo `idProducto`, y una vez con `idProducto: "zzz"`. **Esperado:** Las dos primeras responden `ok`; la última `DATOS_INVALIDOS` (400)
+- [ ] **P-154 · RNF-04** — Pasos: Abrir `http://localhost:8081/api/cambiar_cesta.php` y `.../api/quitar_cesta.php` en el navegador (GET), y hacer un POST a `.../api/cesta.php`. **Esperado:** `METODO_NO_PERMITIDO` (405) en los tres
+- [ ] **P-155 · RNF-07** — Pasos: Con Atlas sin acceso, abrir la cesta con algo dentro. **Esperado:** Aviso rojo "No podemos acceder a tu cesta ahora mismo..."
+- [ ] **P-156 · RNF-08** — Pasos: Con F12 → Console abierta, recorrer la cesta (cambiar, quitar, provocar un aviso) y repetir con la ventana estrecha. **Esperado:** Sin errores de JavaScript (los 409 en rojo de la red son respuestas esperadas); en móvil la página no se desplaza a los lados (solo la tabla)
