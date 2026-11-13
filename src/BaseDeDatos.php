@@ -403,6 +403,16 @@ class BaseDeDatos
     }
 
     /**
+     * Cuenta los pedidos pendientes de todos los compradores (para el aviso de la cabecera del admin).
+     *
+     * @return int
+     */
+    public static function contarPedidosPendientes(): int
+    {
+        return self::coleccion('pedidos')->countDocuments(['estado' => 'pendiente']);
+    }
+
+    /**
      * Lista los pedidos ya aceptados o rechazados, los resueltos más recientemente primero.
      *
      * @return array[] Pedidos con "_id" y las fechas como texto.

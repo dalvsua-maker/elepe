@@ -244,6 +244,7 @@ async function cargarSolicitudes() {
   rellenarMotivos(respuesta.motivos);
 
   ui.numeroPendientes.textContent = String(respuesta.pendientes.length);
+  actualizarAvisoSolicitudes(respuesta.pendientes.length);
   ui.sinPendientes.classList.toggle("d-none", respuesta.pendientes.length > 0);
   ui.sinProcesadas.classList.toggle("d-none", respuesta.resueltos.length > 0);
 

@@ -1,8 +1,12 @@
-/* Elementos de la cabecera (el enlace solo existe si hay sesión iniciada y el badge, si no es admin) */
+/* Elementos de la cabecera (el enlace solo existe si hay sesión iniciada, el badge de la cesta si no es admin
+   y el aviso de solicitudes solo si es admin) */
 const uiCabecera = {
   cerrarSesion: document.getElementById("cerrar-sesion"),
   badgeCesta: document.getElementById("badge-cesta"),
   numeroCesta: document.getElementById("numero-cesta"),
+  badgeSolicitudes: document.getElementById("badge-solicitudes"),
+  numeroSolicitudes: document.getElementById("numero-solicitudes"),
+  numeroSolicitudesMenu: document.getElementById("numero-solicitudes-menu"),
 };
 
 /**
@@ -34,6 +38,35 @@ function actualizarBadgeCesta(unidades) {
 
   uiCabecera.numeroCesta.textContent = String(unidades);
   uiCabecera.badgeCesta.classList.toggle("d-none", unidades === 0);
+}
+
+/**
+ * Pone el número de solicitudes pendientes en el icono de la cuenta y en el menú, y lo esconde si es 0.
+ * La llaman cargarSolicitudesPendientes() y la página de solicitudes al aceptar o rechazar.
+ * @param {number} pendientes
+ */
+function actualizarAvisoSolicitudes(pendientes) {
+  if (uiCabecera.badgeSolicitudes === null) {
+    return;
+  }
+
+  uiCabecera.numeroSolicitudes.textContent = String(pendientes);
+  uiCabecera.numeroSolicitudesMenu.textContent = String(pendientes);
+  uiCabecera.badgeSolicitudes.classList.toggle("d-none", pendientes === 0);
+  uiCabecera.numeroSolicitudesMenu.classList.toggle("d-none", pendientes === 0);
+}
+
+/** Pide al servidor cuántas solicitudes hay pendientes (solo admin). Si falla, el aviso no se muestra. */
+async function cargarSolicitudesPendientes() {
+  const respuesta = await pedirJson("/api/pendientes.php");
+
+  if (respuesta.ok) {
+    actualizarAvisoSolicitudes(respuesta.pendientes);
+  }
+}
+
+if (uiCabecera.badgeSolicitudes !== null) {
+  cargarSolicitudesPendientes();
 }
 
 if (uiCabecera.cerrarSesion !== null) {

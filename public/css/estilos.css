@@ -1,9 +1,9 @@
-/* Fuentes: Roboto Serif estrecha y gruesa, parecida a las letras de los separadores de las cubetas de la tienda.
-   Es un recorte de la fuente variable (ancho 62, peso 750) con solo los caracteres del español */
+/* Fuente: Outfit, geométrica como el logo (círculos y palos rectos).
+   Es un recorte de la fuente variable con los pesos de 400 a 700 y solo los caracteres del español */
 @font-face {
-  font-family: "Roboto Serif Titulos";
-  src: url("../fonts/roboto-serif-titulos.woff2") format("woff2");
-  font-weight: 700;
+  font-family: "Outfit";
+  src: url("../fonts/outfit.woff2") format("woff2");
+  font-weight: 400 700;
   font-style: normal;
   font-display: swap;
 }
@@ -18,6 +18,7 @@
   --cromo-claro: #eef0f3;
   --cromo-oscuro: #9a9ea5;
   --texto: #ecedef;
+  --borde-campo: #6e7178;
 }
 
 /* Tema oscuro de Bootstrap con los colores de Elepé */
@@ -30,11 +31,52 @@
   --bs-secondary-color: var(--cromo-oscuro);
   --bs-link-color-rgb: 201, 204, 209;
   --bs-link-hover-color-rgb: 238, 240, 243;
+  --bs-body-font-family: "Outfit", system-ui, sans-serif;
 }
 
 /* Cabecera: listones verticales, como la fachada donde va el rótulo */
 .navbar {
   background-image: repeating-linear-gradient(90deg, var(--liston) 0 22px, var(--carbon) 22px 24px);
+}
+
+/* En pantallas grandes, el logo y las acciones ocupan lo mismo a cada lado,
+   así los enlaces quedan justo en el centro */
+@media (min-width: 992px) {
+  .navbar-brand,
+  .navbar-acciones {
+    flex: 1 0 0;
+  }
+
+  .navbar-acciones {
+    justify-content: flex-end;
+  }
+}
+
+/* Enlaces del menú: la página actual, en blanco y subrayada en cromo */
+.navbar-nav .nav-link.active {
+  color: var(--texto);
+  box-shadow: inset 0 -2px 0 var(--cromo);
+}
+
+/* Iconos de la cesta y de la cuenta: sin el aspecto de botón */
+.enlace-icono {
+  padding: 0.25rem;
+  border: 0;
+  line-height: 1;
+}
+
+/* Etiqueta "admin" sobre el icono de la cuenta */
+.etiqueta-admin {
+  position: absolute;
+  top: -0.6rem;
+  left: 1rem;
+  padding: 0 0.3rem;
+  border-radius: 0.4rem;
+  background-color: var(--cromo);
+  color: var(--carbon);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 /* Menús desplegables y modales sobre el color de los listones */
@@ -46,12 +88,11 @@
   --bs-modal-bg: var(--liston);
 }
 
-/* Tipografía: los títulos usan la fuente de los separadores */
+/* Tipografía: los títulos, en Outfit gruesa (también los .display, que Bootstrap pone finos) */
 h1,
 h2,
 h3,
-.navbar-brand {
-  font-family: "Roboto Serif Titulos", serif;
+.display-4 {
   font-weight: 700;
 }
 
@@ -72,7 +113,14 @@ h3,
   --bs-btn-disabled-border-color: var(--cromo);
 }
 
-/* Campos de formulario: al escribir, el borde en cromo (no el azul de Bootstrap) */
+/* Campos de formulario: borde con contraste suficiente (3:1, WCAG) y, al escribir, en cromo */
+.form-control,
+.form-select,
+.input-group-text,
+.form-check-input {
+  border-color: var(--borde-campo);
+}
+
 .form-control:focus,
 .form-select:focus {
   border-color: var(--cromo);

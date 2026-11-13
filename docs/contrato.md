@@ -185,6 +185,14 @@ Lista las solicitudes para el panel del administrador.
 - **200:** `{"ok": true, "motivos": ["Sin stock real", "Dirección incorrecta o incompleta", "Datos de contacto incorrectos", "Otro"], "pendientes": [...], "resueltos": [...]}`. `pendientes`, de la más antigua a la más nueva; `resueltos` (aceptados y rechazados), de la resuelta más recientemente a la más antigua. Cada pedido: `{"id", "creadoEn", "resueltoEn", "estado", "comprador": {"nombre", "apellidos", "email", "telefono"}, "direccion", "lineas", "totalCentimos", "motivoRechazo", "detalleRechazo"}` (fechas en texto ISO 8601; `resueltoEn` es `null` si está pendiente).
 - **Errores:** 401 `SIN_SESION`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
 
+### GET /api/pendientes.php
+
+Cuenta los pedidos pendientes para el aviso de la cabecera del administrador (número sobre el icono de la cuenta y junto a "Solicitudes" en el menú).
+
+- **Quién:** solo el administrador (401 sin sesión, 403 con otro rol).
+- **200:** `{"ok": true, "pendientes": 3}`.
+- **Errores:** 401 `SIN_SESION`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
+
 ### POST /api/aceptar_pedido.php
 
 Acepta un pedido pendiente. No toca el stock (ya se descontó al confirmar).
