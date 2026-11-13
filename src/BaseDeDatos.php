@@ -529,4 +529,17 @@ class BaseDeDatos
     {
         self::coleccion('imagenes')->deleteOne(['_id' => new ObjectId($idImagen)]);
     }
+
+    /**
+     * Guarda un mensaje del formulario de contacto.
+     *
+     * @param array $formulario Documento completo del mensaje.
+     * @return string Id del mensaje guardado.
+     */
+    public static function crearFormulario(array $formulario): string
+    {
+        $resultado = self::coleccion('formularios')->insertOne($formulario);
+
+        return (string) $resultado->getInsertedId();
+    }
 }

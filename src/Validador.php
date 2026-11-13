@@ -23,6 +23,14 @@ class Validador
         'Otro',
     ];
 
+    /** Asuntos del formulario de contacto. Es el único sitio donde se listan (contacto.php los pinta desde aquí) */
+    public const ASUNTOS_CONTACTO = [
+        'Información de un disco',
+        'Mi pedido',
+        'Sugerencia',
+        'Otro',
+    ];
+
     /**
      * Nombre o apellidos: de 3 a 30 letras (con tildes y ñ) y espacios.
      *
@@ -351,6 +359,35 @@ class Validador
         $valor = trim($valor);
 
         return mb_strlen($valor) <= 200 ? $valor : null;
+    }
+
+    /**
+     * Asunto del formulario de contacto: uno de la lista ASUNTOS_CONTACTO, escrito igual.
+     *
+     * @param mixed $valor
+     * @return string|null
+     */
+    public static function asunto(mixed $valor): ?string
+    {
+        return is_string($valor) && in_array($valor, self::ASUNTOS_CONTACTO, true) ? $valor : null;
+    }
+
+    /**
+     * Mensaje del formulario de contacto: de 10 a 500 caracteres (sin contar los espacios del principio y del final).
+     *
+     * @param mixed $valor
+     * @return string|null
+     */
+    public static function mensaje(mixed $valor): ?string
+    {
+        if (!is_string($valor)) {
+            return null;
+        }
+
+        $valor = trim($valor);
+        $largo = mb_strlen($valor);
+
+        return $largo >= 10 && $largo <= 500 ? $valor : null;
     }
 
     /**

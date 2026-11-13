@@ -2,7 +2,7 @@
 
 Tienda online de discos y vinilos para navegador. Tiene una landing, una tienda con filtro por género, contacto, cuentas de comprador (cesta, pedidos y su historial) y un panel de administración para gestionar los discos y aceptar o rechazar las solicitudes de compra.
 
-**Estado:** en desarrollo (fase 7 de 9: contacto). Este README se irá completando.
+**Estado:** en desarrollo (fase 8 de 9: landing y pulido visual). Este README se irá completando.
 
 ## Tecnologías
 

@@ -1,6 +1,6 @@
 # Elepe — Plan de pruebas
 
-Estado: **fase 6 cerrada (12/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
+Estado: **fase 7 cerrada (13/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
 
 Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http://localhost:8081`. Cuando un caso sale bien, se marca cambiando `[ ]` por `[x]`. Si falla, se deja `[ ]` y se añade debajo una nota con ❌ y lo que pasó.
 
@@ -223,3 +223,22 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-194 · RF-22** — Pasos: Un comprador hace un pedido con un disco. Como admin, en "Discos", intentar eliminar ese disco. **Esperado:** En el modal, aviso rojo "No se puede eliminar: este disco está en un pedido pendiente..."; el disco sigue en la tabla y en Atlas
 - [ ] **P-195 · RF-22** — Pasos: Aceptar o rechazar ese pedido en "Solicitudes" y volver a eliminar el disco. **Esperado:** Se elimina ("Disco eliminado."); el comprador sigue viendo el pedido en "Mis pedidos" con el título, el precio y el icono genérico
 - [ ] **P-196 · RF-22** — Pasos: Como admin, en F12 → Console, `fetch("/api/eliminar_producto.php", {method: "POST", body: JSON.stringify({id: "<id de un disco en un pedido pendiente>"})}).then(r => r.json()).then(console.log)`. **Esperado:** `{ok: false, error: "DISCO_EN_PEDIDO_PENDIENTE"}` (409)
+
+## Fase 7 · Contacto y "Gracias"
+
+- [ ] **P-197 · RF-26** — Pasos: Como visitante, pulsar "Contacto" en la cabecera. **Esperado:** Formulario "Escríbenos" con Nombre y Email vacíos, Asunto con "Elige un asunto…" y las opciones "Información de un disco", "Mi pedido", "Sugerencia" y "Otro", Mensaje con el contador "0/500" y el botón "Enviar mensaje"
+- [ ] **P-198 · RF-26** — Pasos: Con F12 → Red abierto, pulsar "Enviar mensaje" sin rellenar nada. **Esperado:** Los cuatro campos en rojo con su texto ("De 3 a 30 letras.", "Escribe un email válido.", "Elige un asunto.", "De 10 a 500 caracteres."); no hay ninguna petición a `contacto.php`
+- [ ] **P-199 · RF-26** — Pasos: Probar el nombre "Al" y "Ana2", el email "ana@ejemplo" y un mensaje de 9 caracteres (o de 9 caracteres con espacios delante y detrás) y pulsar "Enviar mensaje"; después, escribir en cada campo y elegir un asunto. **Esperado:** Cada campo mal sale en rojo y no se envía nada; al escribir en un campo o elegir un asunto se le quita el rojo
+- [ ] **P-200 · RF-26** — Pasos: Escribir en el mensaje y borrar; después, pegar un texto de más de 500 caracteres. **Esperado:** El contador sigue lo escrito; al pegar, solo entran 500 caracteres y el contador marca "500/500"
+- [ ] **P-201 · RF-26, RF-27** — Pasos: Como visitante, rellenar todo bien (con espacios delante y detrás del mensaje y el email con alguna mayúscula) y enviar. **Esperado:** El botón pasa a "Enviando…"; se llega a "¡Gracias, <nombre>!" con "Volver al inicio", que lleva al inicio. En Atlas, un documento nuevo en `formularios` con `nombre`, `email` en minúsculas, `asunto`, `mensaje` sin los espacios de los lados, `idUsuario: null` y `creadoEn`
+- [ ] **P-202 · RF-26** — Pasos: En "Gracias", recargar la página (F5). **Esperado:** Se vuelve al formulario de contacto (la página "Gracias" se ve una sola vez)
+- [ ] **P-203 · RF-26** — Pasos: Sin haber enviado nada, abrir `http://localhost:8081/gracias.php`. **Esperado:** Se va al formulario de contacto
+- [ ] **P-204 · RF-26** — Pasos: Enviar un mensaje y, en "Gracias", pulsar "Atrás" en el navegador. **Esperado:** Se ve el formulario con el botón "Enviar mensaje" activo (no "Enviando…") y el contador de acuerdo con lo que haya en el mensaje
+- [ ] **P-205 · RF-26, RF-27** — Pasos: Como comprador, abrir "Contacto"; cambiar el nombre, elegir un asunto, escribir el mensaje y enviar. **Esperado:** Nombre y email llegan rellenos con los de la cuenta y se pueden cambiar; "Gracias" saluda con el nombre escrito; en Atlas, `idUsuario` es el id del comprador; el menú sigue siendo el del comprador
+- [ ] **P-206 · RF-26** — Pasos: Como admin, abrir "Contacto" y enviar un mensaje. **Esperado:** Nombre y email rellenos con los del admin; se envía y se llega a "Gracias"
+- [ ] **P-207 · RNF-03** — Pasos: En F12 → Console, `fetch("/api/contacto.php", {method: "POST", body: JSON.stringify({nombre: "Ana", email: "ana@ejemplo.com", asunto: "Quejas", mensaje: "Mensaje de prueba"})}).then(r => r.json()).then(console.log)`; repetir con `asunto: "otro"`, con un mensaje de 501 caracteres, con un nombre de 31 letras, con `email: "ana@"` y con un cuerpo que no sea JSON (`body: "hola"`). **Esperado:** `ASUNTO_INVALIDO` (dos veces), `MENSAJE_INVALIDO`, `NOMBRE_INVALIDO`, `EMAIL_INVALIDO` y `DATOS_INVALIDOS`, todos 400; en Atlas no se guarda nada
+- [ ] **P-208 · RNF-03** — Pasos: Abrir `http://localhost:8081/api/contacto.php` en la barra de direcciones (GET). **Esperado:** `{"ok":false,"error":"METODO_NO_PERMITIDO"}` (405)
+- [ ] **P-209 · RF-27** — Pasos: Enviar un mensaje con `<script>alert(1)</script>`, eñes, tildes y saltos de línea. **Esperado:** Se llega a "Gracias" sin que se ejecute nada; en Atlas el mensaje está guardado tal cual, como texto
+- [ ] **P-210 · RNF-07** — Pasos: Con Atlas sin acceso, rellenar el formulario y enviar; después, abrir `http://localhost:8081/gracias.php`. **Esperado:** Aviso rojo "No podemos enviar tu mensaje ahora mismo. Inténtalo en un momento."; lo escrito se conserva y el botón vuelve a "Enviar mensaje"; "Gracias" lleva al formulario. Con Atlas bien, volver a enviar funciona
+- [ ] **P-211 · RNF-07** — Pasos: Con sesión de comprador y Atlas sin acceso, abrir "Contacto". **Esperado:** La página se abre; nombre y email vacíos, sin aviso; se pueden escribir
+- [ ] **P-212 · RNF-08** — Pasos: Recorrer "Contacto" y "Gracias" con la consola abierta y con la ventana estrecha. **Esperado:** Sin errores de JavaScript; en el móvil, los campos uno debajo de otro y sin desplazamiento lateral de la página

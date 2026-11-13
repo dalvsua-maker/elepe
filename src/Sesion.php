@@ -162,4 +162,30 @@ class Sesion
 
         return $total;
     }
+
+    /**
+     * Apunta que se acaba de enviar un mensaje de contacto, con el nombre de quien lo envía.
+     * La página "Gracias" solo se muestra si encuentra esta marca.
+     *
+     * @param string $nombre Nombre ya validado que se escribió en el formulario.
+     */
+    public static function marcarContactoEnviado(string $nombre): void
+    {
+        self::iniciar();
+        $_SESSION['contactoEnviado'] = $nombre;
+    }
+
+    /**
+     * Lee la marca del mensaje de contacto y la borra, para que "Gracias" se vea una sola vez.
+     *
+     * @return string|null El nombre de quien envió el mensaje, o null si no hay marca.
+     */
+    public static function tomarContactoEnviado(): ?string
+    {
+        self::iniciar();
+        $nombre = $_SESSION['contactoEnviado'] ?? null;
+        unset($_SESSION['contactoEnviado']);
+
+        return $nombre;
+    }
 }

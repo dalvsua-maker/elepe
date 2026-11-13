@@ -58,6 +58,7 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 - El visitante también tiene sesión y, por tanto, `$_SESSION["cesta"]`.
 - Al iniciar sesión se llama a `session_regenerate_id(true)`, que cambia el identificador pero conserva los datos: la cesta del visitante pasa al comprador (si entra un admin, se vacía). Al cerrar sesión se llama a `session_destroy()`.
 - Tras iniciar sesión o registrarse desde la cesta, el usuario vuelve a ella mediante un parámetro de retorno que PHP solo acepta si es una página de una lista fija (nunca una URL cualquiera).
+- Al enviar el formulario de contacto, `$_SESSION["contactoEnviado"]` guarda el nombre de quien escribe. La página "Gracias" lo lee y lo borra: solo se ve justo después de enviar, y al recargarla se vuelve al formulario.
 - **Dos capas:** (1) cada página protegida comprueba el rol antes de escribir HTML y redirige si no corresponde; (2) cada endpoint de `api/` repite la comprobación y responde 401 o 403 en JSON (la protección real). Los endpoints de la cesta están abiertos a visitante y comprador (403 al admin); el de confirmar pedido solo admite compradores (401 al visitante, 403 al admin).
 - Todo se centraliza en la clase `Sesion`.
 

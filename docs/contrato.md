@@ -202,3 +202,13 @@ Rechaza un pedido pendiente con un motivo y devuelve su stock.
 - **Entrada (JSON):** `idPedido`, `motivo` (uno de la lista de `solicitudes.php`) y `detalle` (de 0 a 200 caracteres; obligatorio si el motivo es `Otro`; si no llega, se toma vacío y se guarda `null`).
 - **200:** `{"ok": true}`.
 - **Errores:** 400 `DATOS_INVALIDOS`, `MOTIVO_INVALIDO` o `DETALLE_INVALIDO`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `PEDIDO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `PEDIDO_YA_RESUELTO` (no cambia nada ni devuelve stock); 503 `BD_NO_DISPONIBLE`.
+
+### POST /api/contacto.php
+
+Guarda un mensaje del formulario de contacto en la colección `formularios`. Si se guarda, deja en la sesión la marca que permite ver la página "Gracias" una sola vez (`gracias.php` la lee y la borra; sin marca, redirige a `contacto.php`).
+
+- **Quién:** todos (visitante, comprador y administrador). Con sesión, `idUsuario` se toma de la sesión; el visitante lo guarda como `null`.
+- **Entrada (JSON):** `nombre` (3 a 30 letras y espacios), `email`, `asunto` (uno de "Información de un disco", "Mi pedido", "Sugerencia" u "Otro", escrito igual) y `mensaje` (10 a 500 caracteres sin contar los espacios del principio y del final).
+- **201:** `{"ok": true}`.
+- **Errores:** 400 `NOMBRE_INVALIDO`, `EMAIL_INVALIDO`, `ASUNTO_INVALIDO`, `MENSAJE_INVALIDO` o `DATOS_INVALIDOS`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE` (no se deja la marca).
+- Con sesión, el formulario rellena el nombre y el email con `GET /api/perfil.php` (ver más arriba); si falla, los campos quedan vacíos.
