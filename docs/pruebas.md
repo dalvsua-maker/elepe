@@ -25,7 +25,7 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [x] **P-14 · Sesion** — Pasos: `docker compose exec web php -r "require 'src/Sesion.php'; Sesion::exigirRolApi(['visitante']); echo 'pasa';"`. **Esperado:** `pasa`
 - [x] **P-15 · RNF-04** — Pasos: `docker compose exec web php -r "require 'src/Sesion.php'; Sesion::exigirRolApi(['comprador']);"`. **Esperado:** `{"ok":false,"error":"SIN_SESION"}`
 - [x] **P-16 · RNF-01** — Pasos: Abrir `http://localhost:8081/css/bootstrap.min.css` y `http://localhost:8081/js/bootstrap.bundle.min.js`. **Esperado:** Se ven los archivos (no un 404)
-- [x] **P-17 · RF-28** — Pasos: Abrir `http://localhost:8081/`. **Esperado:** Se ve la landing con tema oscuro, título en Playfair Display, botón "Ver tienda" en ámbar y tres tarjetas iguales en una fila
+- [x] **P-17 · RF-28** — Pasos: Abrir `http://localhost:8081/`. **Esperado:** Se ve la landing con tema oscuro, título en Playfair Display, botón "Ver tienda" en ámbar y tres tarjetas iguales en una fila *(los tres bloques se quitaron en la fase 8; esta prueba se reescribe al cerrar el inicio)*
 - [x] **P-18 · RNF-08** — Pasos: Reducir la ventana por debajo de 992 px y pulsar la hamburguesa. **Esperado:** El menú se abre y se cierra (funciona el JS de Bootstrap); las tarjetas se apilan
 - [x] **P-19 · RF-11** — Pasos: Como visitante, abrir el menú de la persona. **Esperado:** Aparecen "Iniciar sesión" y "Registrarse"; el icono de la cesta es visible
 - [x] **P-20 · RF-28** — Pasos: Ver el código fuente de la página (Ctrl+U). **Esperado:** Solo HTML; no se ve ningún `<?php` ni `<?=`
@@ -242,3 +242,13 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-210 · RNF-07** — Pasos: Con Atlas sin acceso, rellenar el formulario y enviar; después, abrir `http://localhost:8081/gracias.php`. **Esperado:** Aviso rojo "No podemos enviar tu mensaje ahora mismo. Inténtalo en un momento."; lo escrito se conserva y el botón vuelve a "Enviar mensaje"; "Gracias" lleva al formulario. Con Atlas bien, volver a enviar funciona
 - [ ] **P-211 · RNF-07** — Pasos: Con sesión de comprador y Atlas sin acceso, abrir "Contacto". **Esperado:** La página se abre; nombre y email vacíos, sin aviso; se pueden escribir
 - [ ] **P-212 · RNF-08** — Pasos: Recorrer "Contacto" y "Gracias" con la consola abierta y con la ventana estrecha. **Esperado:** Sin errores de JavaScript; en el móvil, los campos uno debajo de otro y sin desplazamiento lateral de la página
+
+## Fase 8 · Novedades en el inicio
+
+- [ ] **P-213 · RF-28** — Pasos: Como visitante, abrir el inicio. **Esperado:** Debajo de la portada, "Novedades" con "Ver toda la tienda" y 3 fichas iguales a las de la tienda: los 3 últimos discos añadidos, el más nuevo primero
+- [ ] **P-214 · RF-28** — Pasos: Como admin, añadir un disco en "Discos" y abrir el inicio. **Esperado:** El disco nuevo es la primera ficha de "Novedades"; las fichas no tienen el campo de unidades ni el botón (el admin no compra)
+- [ ] **P-215 · RF-09, RF-12** — Pasos: Como visitante o comprador, añadir un disco desde "Novedades"; probar también 0 unidades y más que el stock. **Esperado:** Modal "Añadido a la cesta" y el número de la cesta sube; con 0 o más que el stock, el campo en rojo y no se envía nada
+- [ ] **P-216 · RF-28** — Pasos: Con un disco agotado entre los 3 últimos, abrir el inicio. **Esperado:** Su ficha muestra "Agotado" desactivado
+- [ ] **P-217 · RNF-07** — Pasos: Con Atlas sin acceso, abrir el inicio. **Esperado:** La página se abre sin "Novedades" y sin aviso; "Ver tienda" funciona
+- [ ] **P-218 · RNF-08** — Pasos: Recorrer el inicio y la tienda con la consola abierta y con la ventana estrecha; en la tienda, añadir un disco y filtrar por género. **Esperado:** Sin errores de JavaScript; la tienda funciona igual que antes; en el móvil, una ficha por fila y sin desplazamiento lateral
+

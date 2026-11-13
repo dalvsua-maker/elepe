@@ -11,6 +11,7 @@ $unidadesCesta = Sesion::unidadesEnCesta();
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($titulo) ?></title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/estilos.css">
   <script src="/js/bootstrap.bundle.min.js" defer></script>
@@ -23,7 +24,10 @@ $unidadesCesta = Sesion::unidadesEnCesta();
   <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container">
-        <a class="navbar-brand" href="/">Elepe</a>
+        <!-- Logo de la tienda (SVG, sacado del rótulo real) -->
+        <a class="navbar-brand py-0" href="/">
+          <img src="/img/logo.svg" alt="Elepé" width="110" height="40">
+        </a>
 
         <!-- Botón que abre el menú en pantallas pequeñas -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"

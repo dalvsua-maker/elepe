@@ -63,7 +63,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 ### Contacto y landing
 - **RF-26:** El formulario de contacto pide nombre (3 a 30), email, asunto (lista fija) y mensaje (10 a 500 caracteres, con contador), valida en JS y PHP y lleva a la página "Gracias", que saluda por el nombre y tiene un botón para volver al inicio. Con sesión, el nombre y el email llegan rellenos con los de la cuenta (se pueden cambiar). "Gracias" solo se ve justo después de enviar un mensaje.
 - **RF-27:** Los mensajes de contacto se guardan en Atlas (colección `formularios`), con el id del usuario si había sesión.
-- **RF-28:** La landing tiene una cabecera con el botón "Ver tienda", tres bloques de información, pie de página y "Novedades" (los 3 últimos discos).
+- **RF-28:** La landing tiene una cabecera con el botón "Ver tienda", pie de página y "Novedades" (los 3 últimos discos, con la misma ficha de la tienda; si no se pueden cargar, la sección no se muestra).
 
 ## 5. Requisitos no funcionales
 
@@ -96,5 +96,5 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 | 5 | Cesta (ver, cambiar unidades y quitar) | Cerrada (12/11/2026) |
 | 6 | Pedidos y solicitudes (confirmar, mis pedidos, volver a comprar, solicitudes del admin) | Cerrada (12/11/2026) |
 | 7 | Contacto y "Gracias" | Cerrada (13/11/2026) |
-| 8 | Landing y pulido visual | Pendiente |
+| 8 | Landing y pulido visual | En curso (novedades hechas) |
 | 9 | Pruebas, documentación final y despliegue | Pendiente |

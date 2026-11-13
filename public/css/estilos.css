@@ -1,73 +1,108 @@
-/* Fuentes */
+/* Fuentes: Roboto Serif estrecha y gruesa, parecida a las letras de los separadores de las cubetas de la tienda.
+   Es un recorte de la fuente variable (ancho 62, peso 750) con solo los caracteres del español */
 @font-face {
-  font-family: "Playfair Display";
-  src: url("../fonts/playfair-display-700.woff2") format("woff2");
+  font-family: "Roboto Serif Titulos";
+  src: url("../fonts/roboto-serif-titulos.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
-/* Variables */
+/* Variables: los colores de la fachada de la tienda (listones carbón y letras cromadas).
+   La interfaz es sobria, en grises; el color lo ponen las portadas de los discos */
 :root {
-  --fondo: #14110f;
-  --superficie: #1f1a17;
-  --texto: #f3ece4;
-  --acento: #e8a33d;
-  --acento-oscuro: #c98a2b;
+  --carbon: #141416;
+  --liston: #232326;
+  --borde: #34343a;
+  --cromo: #c9ccd1;
+  --cromo-claro: #eef0f3;
+  --cromo-oscuro: #9a9ea5;
+  --texto: #ecedef;
 }
 
-/* Tema oscuro de Bootstrap con los colores de Elepe */
+/* Tema oscuro de Bootstrap con los colores de Elepé */
 [data-bs-theme="dark"] {
-  --bs-body-bg: var(--fondo);
+  --bs-body-bg: var(--carbon);
   --bs-body-color: var(--texto);
-  --bs-tertiary-bg: var(--superficie);
-  --bs-link-color-rgb: 232, 163, 61;
-  --bs-link-hover-color-rgb: 201, 138, 43;
+  --bs-tertiary-bg: var(--liston);
+  --bs-border-color: var(--borde);
+  --bs-secondary-rgb: 154, 158, 165;
+  --bs-secondary-color: var(--cromo-oscuro);
+  --bs-link-color-rgb: 201, 204, 209;
+  --bs-link-hover-color-rgb: 238, 240, 243;
 }
 
-/* Tipografía: los títulos usan Playfair Display */
+/* Cabecera: listones verticales, como la fachada donde va el rótulo */
+.navbar {
+  background-image: repeating-linear-gradient(90deg, var(--liston) 0 22px, var(--carbon) 22px 24px);
+}
+
+/* Menús desplegables y modales sobre el color de los listones */
+.dropdown-menu {
+  --bs-dropdown-bg: var(--liston);
+}
+
+.modal {
+  --bs-modal-bg: var(--liston);
+}
+
+/* Tipografía: los títulos usan la fuente de los separadores */
 h1,
 h2,
 h3,
 .navbar-brand {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto Serif Titulos", serif;
   font-weight: 700;
 }
 
-/* Botón principal en ámbar */
+/* Botón principal en cromo, con el texto en carbón */
 .btn-primary {
-  --bs-btn-color: var(--fondo);
-  --bs-btn-bg: var(--acento);
-  --bs-btn-border-color: var(--acento);
-  --bs-btn-hover-color: var(--fondo);
-  --bs-btn-hover-bg: var(--acento-oscuro);
-  --bs-btn-hover-border-color: var(--acento-oscuro);
-  --bs-btn-active-color: var(--fondo);
-  --bs-btn-active-bg: var(--acento-oscuro);
-  --bs-btn-active-border-color: var(--acento-oscuro);
-  --bs-btn-focus-shadow-rgb: 232, 163, 61;
-  --bs-btn-disabled-color: var(--fondo);
-  --bs-btn-disabled-bg: var(--acento);
-  --bs-btn-disabled-border-color: var(--acento);
+  --bs-btn-color: var(--carbon);
+  --bs-btn-bg: var(--cromo);
+  --bs-btn-border-color: var(--cromo);
+  --bs-btn-hover-color: var(--carbon);
+  --bs-btn-hover-bg: var(--cromo-claro);
+  --bs-btn-hover-border-color: var(--cromo-claro);
+  --bs-btn-active-color: var(--carbon);
+  --bs-btn-active-bg: var(--cromo-claro);
+  --bs-btn-active-border-color: var(--cromo-claro);
+  --bs-btn-focus-shadow-rgb: 201, 204, 209;
+  --bs-btn-disabled-color: var(--carbon);
+  --bs-btn-disabled-bg: var(--cromo);
+  --bs-btn-disabled-border-color: var(--cromo);
 }
 
-/* Tarjetas sobre la superficie */
+/* Campos de formulario: al escribir, el borde en cromo (no el azul de Bootstrap) */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--cromo);
+  box-shadow: 0 0 0 0.25rem rgba(201, 204, 209, 0.25);
+}
+
+/* Tarjetas sobre el color de los listones */
 .card {
-  --bs-card-bg: var(--superficie);
+  --bs-card-bg: var(--liston);
 }
 
-/* Badge de la cesta en ámbar */
+/* Insignias de género (fichas y panel): contorno cromado, sin relleno */
+.text-bg-secondary {
+  color: var(--cromo) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--borde);
+}
+
+/* Badge de la cesta en cromo */
 .badge-cesta {
-  background-color: var(--acento);
-  color: var(--fondo);
+  background-color: var(--cromo);
+  color: var(--carbon);
 }
 
-/* Filtro de la tienda: pastillas en ámbar (la elegida, rellena) */
+/* Filtro de la tienda: pastillas en cromo (la elegida, rellena) */
 .nav-pills {
-  --bs-nav-link-color: var(--acento);
-  --bs-nav-link-hover-color: var(--acento-oscuro);
-  --bs-nav-pills-link-active-bg: var(--acento);
-  --bs-nav-pills-link-active-color: var(--fondo);
+  --bs-nav-link-color: var(--cromo);
+  --bs-nav-link-hover-color: var(--cromo-claro);
+  --bs-nav-pills-link-active-bg: var(--cromo);
+  --bs-nav-pills-link-active-color: var(--carbon);
 }
 
 /* Fichas de la tienda: portada cuadrada */
@@ -82,15 +117,15 @@ h3,
 
 /* Acordeón de pedidos: sin el azul de Bootstrap */
 .accordion {
-  --bs-accordion-active-bg: var(--superficie);
+  --bs-accordion-active-bg: var(--liston);
   --bs-accordion-active-color: var(--texto);
-  --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(232, 163, 61, 0.25);
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(201, 204, 209, 0.25);
 }
 
 /* La flecha del acordeón, del color del texto. En el tema oscuro Bootstrap la define en el ::after,
    así que se cambia con el mismo selector (este archivo se carga después y gana) */
 [data-bs-theme="dark"] .accordion-button::after {
-  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23f3ece4' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M2 5L8 11L14 5'/%3e%3c/svg%3e");
+  --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ecedef' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M2 5L8 11L14 5'/%3e%3c/svg%3e");
   --bs-accordion-btn-active-icon: var(--bs-accordion-btn-icon);
 }
 
@@ -100,8 +135,8 @@ h3,
   font-weight: 400;
 }
 
-/* Pestañas de las solicitudes: el texto en ámbar, sin el azul de Bootstrap */
+/* Pestañas de las solicitudes: el texto en cromo, sin el azul de Bootstrap */
 .nav-tabs {
-  --bs-nav-link-color: var(--acento);
-  --bs-nav-link-hover-color: var(--acento-oscuro);
+  --bs-nav-link-color: var(--cromo);
+  --bs-nav-link-hover-color: var(--cromo-claro);
 }

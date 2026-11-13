@@ -1,5 +1,10 @@
 <?php
 
+require_once __DIR__ . '/../src/Sesion.php';
+
+/* Las novedades usan la misma ficha que la tienda: el administrador las ve, pero no puede comprarlas */
+$puedeComprar = Sesion::rol() !== 'admin';
+
 $titulo = 'Elepe · Discos y vinilos';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
@@ -13,36 +18,20 @@ require __DIR__ . '/../src/partes/cabecera.php';
   </div>
 </section>
 
-<!-- Tres razones para entrar -->
-<section class="pb-5">
+<!-- Novedades: los 3 últimos discos (los pinta inicio.js). Si no se pueden cargar, la sección no se muestra -->
+<section class="pb-5 d-none" id="novedades">
   <div class="container">
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="h5 card-title">Cuatro géneros</h2>
-            <p class="card-text">Rock, jazz, pop y electrónica. Doce discos para empezar la colección.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="h5 card-title">Tu cesta, sin cuenta</h2>
-            <p class="card-text">Llena la cesta sin registrarte. Solo te pedimos entrar cuando vayas a confirmar el pedido.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="h5 card-title">Pedidos revisados</h2>
-            <p class="card-text">Revisamos cada pedido antes de aceptarlo y, si algo falla, te contamos el motivo.</p>
-          </div>
-        </div>
-      </div>
+    <div class="d-flex justify-content-between align-items-baseline mb-4">
+      <h2 class="h3 mb-0">Novedades</h2>
+      <a href="/tienda.php">Ver toda la tienda</a>
     </div>
+    <div class="row g-4" id="lista-novedades" data-puede-comprar="<?= $puedeComprar ? 'si' : 'no' ?>"></div>
   </div>
 </section>
+
+<?php require __DIR__ . '/../src/partes/modal_cesta.php'; ?>
+
+<script src="/js/fichas.js" defer></script>
+<script src="/js/inicio.js" defer></script>
 
 <?php require __DIR__ . '/../src/partes/pie.php'; ?>
