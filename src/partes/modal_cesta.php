@@ -1,4 +1,4 @@
-<!-- Modal que confirma que el disco se ha añadido a la cesta (o explica por qué no).
+<!-- Modal que confirma que el disco se ha añadido a la cesta, con dos salidas: seguir comprando o ir a la cesta.
      Lo usan la tienda y las novedades del inicio; fichas.js lo abre -->
 <div class="modal fade" id="modal-cesta" tabindex="-1" aria-labelledby="titulo-modal-cesta" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -11,7 +11,8 @@
         <p id="texto-modal-cesta" class="mb-0"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Seguir comprando</button>
+        <a class="btn btn-primary" href="/cesta.php">Ir a la cesta</a>
       </div>
     </div>
   </div>

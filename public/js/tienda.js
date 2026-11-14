@@ -4,6 +4,7 @@ const ui = {
   aviso: document.getElementById("aviso"),
   cargando: document.getElementById("cargando"),
   lista: document.getElementById("lista-discos"),
+  buscador: document.getElementById("buscador"),
 };
 
 /* Lo decide PHP según el rol: el administrador ve los discos, pero no compra */
@@ -12,9 +13,17 @@ const puedeComprar = ui.lista.dataset.puedeComprar === "si";
 /* Género elegido en el filtro ("" son todos) */
 let generoActivo = "";
 
+/* Lo que se busca ("" si el buscador está vacío o tiene menos de 2 letras) */
+let busquedaActiva = "";
+
+/* Espera entre que se deja de escribir y se pide la lista (para no pedirla con cada letra) */
+const ESPERA_BUSCADOR = 300;
+let temporizadorBuscador = null;
+
 /* Mensajes para los errores al pedir la lista (los de añadir a la cesta están en fichas.js) */
 const mensajesError = {
   GENERO_INVALIDO: "Ese género no es válido.",
+  BUSQUEDA_INVALIDA: "Escribe entre 2 y 60 caracteres para buscar.",
   BD_NO_DISPONIBLE: "No podemos acceder a los discos ahora mismo. Inténtalo en un momento.",
   SIN_CONEXION: "No hay conexión con el servidor. Inténtalo de nuevo.",
 };
@@ -47,8 +56,13 @@ function pintarDiscos(discos) {
   if (discos.length === 0) {
     const mensaje = document.createElement("p");
     mensaje.className = "col-12 text-secondary";
-    mensaje.textContent =
-      generoActivo === "" ? "Todavía no hay discos en la tienda." : "Ahora mismo no hay discos de este género.";
+    if (busquedaActiva !== "") {
+      mensaje.textContent = "No hay discos que coincidan con «" + ui.buscador.value.trim() + "»" +
+        (generoActivo === "" ? "." : " en " + generoActivo + ".");
+    } else {
+      mensaje.textContent =
+        generoActivo === "" ? "Todavía no hay discos en la tienda." : "Ahora mismo no hay discos de este género.";
+    }
     ui.lista.append(mensaje);
     return;
   }
@@ -58,18 +72,28 @@ function pintarDiscos(discos) {
   }
 }
 
-/** Pide al servidor los discos del género elegido (o todos) y pinta las fichas. */
+/** Pide al servidor los discos del género elegido (o todos) que coinciden con la búsqueda y pinta las tarjetas. */
 async function cargarDiscos() {
   const generoPedido = generoActivo;
-  const url =
-    generoPedido === "" ? "/api/productos.php" : "/api/productos.php?genero=" + encodeURIComponent(generoPedido);
+  const busquedaPedida = busquedaActiva;
+
+  /* URLSearchParams arma la parte "?genero=...&q=..." y codifica los caracteres especiales */
+  const parametros = new URLSearchParams();
+  if (generoPedido !== "") {
+    parametros.set("genero", generoPedido);
+  }
+  if (busquedaPedida !== "") {
+    parametros.set("q", busquedaPedida);
+  }
+  const consulta = parametros.toString();
+  const url = "/api/productos.php" + (consulta === "" ? "" : "?" + consulta);
 
   ui.aviso.classList.add("d-none");
   ui.cargando.classList.remove("d-none");
   const respuesta = await pedirJson(url);
 
-  /* Si mientras llegaba la respuesta se ha elegido otro género, esta ya no sirve */
-  if (generoPedido !== generoActivo) {
+  /* Si mientras llegaba la respuesta se ha elegido otro género o se ha seguido escribiendo, esta ya no sirve */
+  if (generoPedido !== generoActivo || busquedaPedida !== busquedaActiva) {
     return;
   }
 
@@ -81,7 +105,7 @@ async function cargarDiscos() {
     return;
   }
 
-  pintarDiscos(respuesta.productos);
+  pintarDiscos(respuesta.discos);
 }
 
 /** Marca como activo el botón del género elegido. */
@@ -142,6 +166,19 @@ async function cargarGeneros() {
   ui.filtro.replaceChildren(...botones);
   marcarGeneroActivo();
 }
+
+/* Buscador: espera a que se deje de escribir; con menos de 2 letras se enseña todo */
+ui.buscador.addEventListener("input", () => {
+  clearTimeout(temporizadorBuscador);
+  temporizadorBuscador = setTimeout(() => {
+    const texto = ui.buscador.value.trim();
+    const nueva = texto.length >= 2 ? texto : "";
+    if (nueva !== busquedaActiva) {
+      busquedaActiva = nueva;
+      cargarDiscos();
+    }
+  }, ESPERA_BUSCADOR);
+});
 
 cargarGeneros();
 cargarDiscos();

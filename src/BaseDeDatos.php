@@ -7,6 +7,7 @@ use MongoDB\Client;
 use MongoDB\Driver\Exception\BulkWriteException;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/Validador.php';
 
 /** La única clase que habla con Atlas: el resto pide lo que necesite a esta clase */
 class BaseDeDatos
@@ -60,7 +61,16 @@ class BaseDeDatos
     public static function prepararIndices(): void
     {
         self::coleccion('usuarios')->createIndex(['email' => 1], ['unique' => true]);
-        self::coleccion('productos')->createIndex(['titulo' => 1, 'artista' => 1], ['unique' => true]);
+
+        /* Cada formato de un disco es un documento: no puede haber dos con el mismo título, artista y formato.
+           El índice antiguo (solo título y artista) impediría tener el CD y el vinilo, así que se quita */
+        $productos = self::coleccion('productos');
+        foreach ($productos->listIndexes() as $indice) {
+            if ($indice->getName() === 'titulo_1_artista_1') {
+                $productos->dropIndex('titulo_1_artista_1');
+            }
+        }
+        $productos->createIndex(['titulo' => 1, 'artista' => 1, 'formato' => 1], ['unique' => true]);
     }
 
     /**
@@ -169,6 +179,8 @@ class BaseDeDatos
     {
         $producto['_id'] = (string) $producto['_id'];
         $producto['idImagen'] = $producto['idImagen'] ?? null;
+        $producto['formato'] = $producto['formato'] ?? null;
+        $producto['generos'] = $producto['generos'] ?? [];
 
         return $producto;
     }
@@ -234,37 +246,148 @@ class BaseDeDatos
     }
 
     /**
-     * Lista los discos, los más nuevos primero.
+     * Lista los discos, los más nuevos primero. Junta los formatos de un mismo disco (mismo título y artista)
+     * en una sola entrada, para que la tienda enseñe una tarjeta por disco.
      *
-     * @param string|null $genero Solo los de este género, o null para todos.
-     * @param int|null    $limite Máximo de discos, o null para todos.
-     * @return array[] Discos con "_id" e "idImagen" como texto.
+     * @param string|null $genero   Solo los que tienen este género, o null para todos.
+     * @param int|null    $limite   Máximo de discos (no de formatos), o null para todos.
+     * @param string|null $busqueda Texto ya pasado por Validador::busqueda: se busca en el título y el artista.
+     * @return array[] Discos con "id" (el de su primer formato), "titulo", "artista", "anio", "generos",
+     *                 "descripcion", "idImagen" y "formatos" (cada uno con "id", "formato", "precioCentimos" y "stock").
      */
-    public static function listarProductos(?string $genero = null, ?int $limite = null): array
+    public static function listarDiscos(?string $genero = null, ?int $limite = null, ?string $busqueda = null): array
     {
-        $filtro = $genero === null ? [] : ['genero' => $genero];
-        $opciones = [
-            'sort' => ['creadoEn' => -1, '_id' => -1],
-            'typeMap' => ['root' => 'array', 'document' => 'array'],
-        ];
-
-        if ($limite !== null) {
-            $opciones['limit'] = $limite;
+        /* "generos" es una lista: Mongo encuentra el disco si alguno de sus géneros coincide */
+        $filtro = [];
+        if ($genero !== null) {
+            $filtro['generos'] = $genero;
+        }
+        if ($busqueda !== null) {
+            /* preg_quote: los caracteres especiales de una expresión regular se buscan tal cual */
+            $filtro['busqueda'] = ['$regex' => preg_quote($busqueda)];
         }
 
-        $productos = self::coleccion('productos')->find($filtro, $opciones)->toArray();
+        $productos = self::coleccion('productos')->find($filtro, [
+            'sort' => ['creadoEn' => -1, '_id' => -1],
+            'typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array'],
+        ])->toArray();
+
+        $discos = self::agruparPorDisco(array_map(fn ($producto) => self::prepararProducto($producto), $productos));
+
+        return $limite === null ? $discos : array_slice($discos, 0, $limite);
+    }
+
+    /**
+     * Junta los formatos que tienen el mismo título y artista. Conserva el orden en que llegan.
+     *
+     * @param array[] $productos Documentos de "productos" ya preparados.
+     * @return array[]
+     */
+    private static function agruparPorDisco(array $productos): array
+    {
+        $discos = [];
+
+        foreach ($productos as $producto) {
+            $clave = $producto['titulo'] . '|' . $producto['artista'];
+
+            if (!isset($discos[$clave])) {
+                $discos[$clave] = [
+                    'id'          => $producto['_id'],
+                    'titulo'      => $producto['titulo'],
+                    'artista'     => $producto['artista'],
+                    'anio'        => $producto['anio'],
+                    'generos'     => $producto['generos'],
+                    'descripcion' => $producto['descripcion'],
+                    'idImagen'    => $producto['idImagen'],
+                    'formatos'    => [],
+                ];
+            }
+
+            $discos[$clave]['formatos'][] = [
+                'id'             => $producto['_id'],
+                'formato'        => $producto['formato'],
+                'precioCentimos' => $producto['precioCentimos'],
+                'stock'          => $producto['stock'],
+            ];
+        }
+
+        /* Los formatos, siempre en el mismo orden (CD antes que Vinilo) */
+        foreach ($discos as &$disco) {
+            usort($disco['formatos'], fn ($a, $b) => strcmp($a['formato'], $b['formato']));
+        }
+        unset($disco);
+
+        return array_values($discos);
+    }
+
+    /**
+     * Todos los formatos guardados de un disco (los documentos con ese título y artista).
+     *
+     * @param string $titulo
+     * @param string $artista
+     * @return array[] Documentos preparados (con "_id" e "idImagen" como texto). Vacío si no hay ninguno.
+     */
+    public static function buscarFormatosDeDisco(string $titulo, string $artista): array
+    {
+        $productos = self::coleccion('productos')->find(
+            ['titulo' => $titulo, 'artista' => $artista],
+            ['typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array']]
+        )->toArray();
 
         return array_map(fn ($producto) => self::prepararProducto($producto), $productos);
     }
 
     /**
+     * Indica si alguna portada de disco usa todavía esta imagen (los formatos de un disco la comparten).
+     *
+     * @param string $idImagen
+     */
+    public static function imagenEnUso(string $idImagen): bool
+    {
+        return self::coleccion('productos')->countDocuments(['idImagen' => $idImagen], ['limit' => 1]) > 0;
+    }
+
+    /**
+     * Pasa los discos antiguos (un solo precio y stock y un "genero" de texto) al modelo de formatos:
+     * les pone el formato indicado, la lista "generos" y el campo "busqueda". Solo toca los que no tienen formato.
+     * La usa scripts/migrar_formatos.php, una sola vez.
+     *
+     * @param string $formato Formato que se les pone (uno de Validador::FORMATOS).
+     * @return int Cuántos discos se han pasado.
+     */
+    public static function migrarDiscosSinFormato(string $formato): int
+    {
+        $productos = self::coleccion('productos');
+        $antiguos = $productos->find(
+            ['formato' => ['$exists' => false]],
+            ['typeMap' => ['root' => 'array', 'document' => 'array', 'array' => 'array']]
+        );
+
+        $cuantos = 0;
+        foreach ($antiguos as $producto) {
+            $productos->updateOne(['_id' => $producto['_id']], [
+                '$set' => [
+                    'formato'  => $formato,
+                    'generos'  => isset($producto['genero']) ? [$producto['genero']] : [],
+                    'busqueda' => Validador::textoBusqueda($producto['titulo'] . ' ' . $producto['artista']),
+                ],
+                '$unset' => ['genero' => ''],
+            ]);
+            $cuantos++;
+        }
+
+        return $cuantos;
+    }
+
+    /**
      * Géneros que hay ahora mismo en el catálogo, sin repetir y ordenados sin distinguir mayúsculas.
+     * Cada disco tiene una lista de géneros: distinct devuelve cada género suelto.
      *
      * @return string[]
      */
     public static function listarGeneros(): array
     {
-        $generos = self::coleccion('productos')->distinct('genero');
+        $generos = self::coleccion('productos')->distinct('generos');
         usort($generos, fn ($a, $b) => strcmp(mb_strtolower($a), mb_strtolower($b)));
 
         return $generos;

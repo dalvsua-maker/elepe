@@ -15,6 +15,12 @@ class Validador
     /** Precio máximo de un disco en céntimos (500 €) */
     public const PRECIO_MAX_CENTIMOS = 50000;
 
+    /** Formatos en los que se vende un disco. Cada formato es un documento de "productos" con su precio y su stock */
+    public const FORMATOS = ['CD', 'Vinilo'];
+
+    /** Cuántos géneros puede tener un disco */
+    public const MAX_GENEROS = 3;
+
     /** Motivos para rechazar un pedido. Es el único sitio donde se listan (el JS los recibe del servidor) */
     public const MOTIVOS_RECHAZO = [
         'Sin stock real',
@@ -252,6 +258,81 @@ class Validador
         }
 
         return preg_match('/^[\p{L}\p{N} &\'’.\/+-]{2,30}$/u', $valor) ? $valor : null;
+    }
+
+    /**
+     * Varios géneros (de 1 a MAX_GENEROS), cada uno con las reglas de genero(). Quita los repetidos
+     * aunque estén escritos con otras mayúsculas.
+     *
+     * @param mixed $valor Lista de textos (en un formulario: generos[]).
+     * @return string[]|null
+     */
+    public static function generos(mixed $valor): ?array
+    {
+        if (!is_array($valor)) {
+            return null;
+        }
+
+        $generos = [];
+        foreach ($valor as $texto) {
+            $genero = self::genero($texto);
+            if ($genero === null) {
+                return null;
+            }
+            $generos[mb_strtolower($genero)] ??= $genero;
+        }
+
+        $generos = array_values($generos);
+        $cuantos = count($generos);
+
+        return $cuantos >= 1 && $cuantos <= self::MAX_GENEROS ? $generos : null;
+    }
+
+    /**
+     * Uno de los formatos de FORMATOS (comparación exacta).
+     *
+     * @param mixed $valor
+     * @return string|null
+     */
+    public static function formato(mixed $valor): ?string
+    {
+        return in_array($valor, self::FORMATOS, true) ? $valor : null;
+    }
+
+    /**
+     * Pasa un texto a minúsculas y sin tildes, para buscar sin que importen ("jose" encuentra "José").
+     * Se usa al guardar un disco (campo "busqueda") y al buscar.
+     *
+     * @param string $texto
+     * @return string
+     */
+    public static function textoBusqueda(string $texto): string
+    {
+        $sinTildes = strtr(mb_strtolower($texto), [
+            'á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e',
+            'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i', 'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u', 'ñ' => 'n', 'ç' => 'c',
+        ]);
+
+        return preg_replace('/\s+/u', ' ', trim($sinTildes));
+    }
+
+    /**
+     * Lo que se escribe en el buscador de la tienda: de 2 a 60 caracteres. Devuelve el texto listo para buscar.
+     *
+     * @param mixed $valor
+     * @return string|null
+     */
+    public static function busqueda(mixed $valor): ?string
+    {
+        if (!is_string($valor)) {
+            return null;
+        }
+
+        $texto = self::textoBusqueda($valor);
+        $largo = mb_strlen($texto);
+
+        return $largo >= 2 && $largo <= 60 ? $texto : null;
     }
 
     /**

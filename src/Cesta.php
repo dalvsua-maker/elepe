@@ -32,6 +32,9 @@ class Cesta
         foreach ($cesta as $linea) {
             $disco = $productos[$linea['idProducto']] ?? null;
 
+            /* En los avisos, el título lleva el formato ("Nevermind · Vinilo"): puede haber dos en la cesta */
+            $nombre = $disco === null ? '' : $disco['titulo'] . ($disco['formato'] === null ? '' : ' · ' . $disco['formato']);
+
             /* El admin ha borrado el disco */
             if ($disco === null) {
                 $avisos[] = ['tipo' => 'ELIMINADO'];
@@ -40,7 +43,7 @@ class Cesta
 
             /* Se ha agotado mientras estaba en la cesta */
             if ($disco['stock'] === 0) {
-                $avisos[] = ['tipo' => 'AGOTADO', 'titulo' => $disco['titulo']];
+                $avisos[] = ['tipo' => 'AGOTADO', 'titulo' => $nombre];
                 continue;
             }
 
@@ -48,7 +51,7 @@ class Cesta
             $unidades = $linea['unidades'];
             if ($unidades > $disco['stock']) {
                 $unidades = $disco['stock'];
-                $avisos[] = ['tipo' => 'AJUSTADO', 'titulo' => $disco['titulo'], 'stock' => $disco['stock']];
+                $avisos[] = ['tipo' => 'AJUSTADO', 'titulo' => $nombre, 'stock' => $disco['stock']];
             }
 
             $subtotalCentimos = $disco['precioCentimos'] * $unidades;
@@ -59,6 +62,7 @@ class Cesta
                 'idProducto'       => $linea['idProducto'],
                 'titulo'           => $disco['titulo'],
                 'artista'          => $disco['artista'],
+                'formato'          => $disco['formato'],
                 'precioCentimos'   => $disco['precioCentimos'],
                 'unidades'         => $unidades,
                 'stock'            => $disco['stock'],

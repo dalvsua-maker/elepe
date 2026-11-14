@@ -123,7 +123,9 @@ function crearTablaLineas(lineas) {
   for (const linea of lineas) {
     const fila = document.createElement("tr");
     const celdaDisco = document.createElement("td");
-    celdaDisco.append(crear("div", "fw-semibold", linea.titulo), crear("div", "small text-secondary", linea.artista));
+    /* El formato va junto al artista (los pedidos anteriores a los formatos no lo tienen) */
+    const debajo = linea.formato ? linea.artista + " · " + linea.formato : linea.artista;
+    celdaDisco.append(crear("div", "fw-semibold", linea.titulo), crear("div", "small text-secondary", debajo));
     fila.append(
       celdaDisco,
       crear("td", "text-nowrap", "× " + linea.unidades),

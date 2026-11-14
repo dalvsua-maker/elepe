@@ -6,7 +6,13 @@ const ui = {
   vacia: document.getElementById("cesta-vacia"),
   contenido: document.getElementById("contenido-cesta"),
   lineas: document.getElementById("lineas-cesta"),
+  articulos: document.getElementById("articulos-cesta"),
   total: document.getElementById("total-cesta"),
+  envio: document.getElementById("envio-cesta"),
+  fecha: document.getElementById("fecha-cesta"),
+  toastQuitado: document.getElementById("toast-quitado"),
+  textoQuitado: document.getElementById("texto-quitado"),
+  botonDeshacer: document.getElementById("boton-deshacer"),
   botonConfirmar: document.getElementById("boton-confirmar"),
   modalConfirmar: document.getElementById("modal-confirmar"),
   textoConfirmar: document.getElementById("texto-confirmar"),
@@ -20,11 +26,18 @@ const ui = {
 const modalConfirmar = bootstrap.Modal.getOrCreateInstance(ui.modalConfirmar);
 const modalSesion = bootstrap.Modal.getOrCreateInstance(ui.modalSesion);
 const modalDireccion = bootstrap.Modal.getOrCreateInstance(ui.modalDireccion);
+/* El aviso de "Has quitado..." se cierra solo a los 6 segundos */
+const toastQuitado = bootstrap.Toast.getOrCreateInstance(ui.toastQuitado, { delay: 6000 });
 
 /* Lo decide PHP según el rol: solo el comprador puede confirmar */
 const esComprador = ui.contenido.dataset.comprador === "si";
 
 const PORTADA_GENERICA = "/img/disco.svg";
+
+/* Lo último que se ha quitado, para poder deshacerlo desde el aviso */
+let ultimoQuitado = null;
+/* Texto de la dirección de entrega del comprador (se pide una vez al cargar) */
+let textoDireccion = null;
 
 /* Mensajes para los errores que devuelve el servidor */
 const mensajesError = {
@@ -34,6 +47,7 @@ const mensajesError = {
   FALTA_DIRECCION: "Te falta la dirección de entrega: añádela en «Mis datos».",
   BD_NO_DISPONIBLE: "No podemos acceder a tu cesta ahora mismo. Inténtalo en un momento.",
   SIN_CONEXION: "No hay conexión con el servidor. Inténtalo de nuevo.",
+  STOCK_INSUFICIENTE: "Ya no quedan unidades suficientes de ese disco.",
 };
 
 /**
@@ -70,6 +84,15 @@ function formatearPrecio(centimos) {
  */
 function textoUnidades(unidades) {
   return unidades === 1 ? "1 unidad" : unidades + " unidades";
+}
+
+/**
+ * Texto de los artículos del ticket: 1 → "1 artículo", 3 → "3 artículos".
+ * @param {number} unidades
+ * @returns {string}
+ */
+function textoArticulos(unidades) {
+  return unidades === 1 ? "1 artículo" : unidades + " artículos";
 }
 
 /**
@@ -124,86 +147,130 @@ function sinPermiso(codigo) {
 }
 
 /**
- * Crea una celda de la tabla con un texto.
- * @param {string} texto
+ * Crea un elemento con su clase y, si se da, su texto (siempre con textContent, nunca como HTML).
+ * @param {string} etiqueta
  * @param {string} [clase]
- * @returns {HTMLTableCellElement}
+ * @param {string} [texto]
+ * @returns {HTMLElement}
  */
-function crearCelda(texto, clase = "") {
-  const celda = document.createElement("td");
-  celda.textContent = texto;
-  celda.className = clase;
-  return celda;
+function crearElemento(etiqueta, clase = "", texto) {
+  const elemento = document.createElement(etiqueta);
+  elemento.className = clase;
+  if (texto !== undefined) {
+    elemento.textContent = texto;
+  }
+  return elemento;
 }
 
 /**
- * Crea la fila de un disco de la cesta. El texto se pone con textContent, nunca como HTML.
+ * Nombre de un disco con su formato para los textos: "Nevermind (Vinilo)".
  * @param {object} linea
- * @returns {HTMLTableRowElement}
+ * @returns {string}
  */
-function crearFila(linea) {
-  const fila = document.createElement("tr");
+function nombreConFormato(linea) {
+  return linea.formato ? "«" + linea.titulo + "» (" + linea.formato + ")" : "«" + linea.titulo + "»";
+}
 
-  /* Disco: portada pequeña, título y artista */
-  const celdaDisco = document.createElement("td");
-  const bloque = document.createElement("div");
-  bloque.className = "d-flex align-items-center gap-3";
+/**
+ * Unidades de una línea con − y + (un input-group de Bootstrap: botones y campo pegados).
+ * El − se desactiva en 1 y el + cuando no queda más stock. Se guarda al momento.
+ * @param {object} linea
+ * @returns {HTMLDivElement}
+ */
+function crearUnidades(linea) {
+  const grupo = crearElemento("div", "input-group input-group-sm flex-nowrap w-auto unidades");
 
-  const imagen = document.createElement("img");
-  imagen.src = linea.idImagen ? "/api/imagen.php?id=" + encodeURIComponent(linea.idImagen) : PORTADA_GENERICA;
-  imagen.alt = "Portada de " + linea.titulo;
-  imagen.width = 56;
-  imagen.height = 56;
-  imagen.className = "rounded object-fit-cover";
+  const menos = crearElemento("button", "btn btn-outline-secondary", "−");
+  menos.type = "button";
+  menos.setAttribute("aria-label", "Una unidad menos de " + linea.titulo);
+  menos.disabled = linea.unidades <= 1;
 
-  const textos = document.createElement("div");
-  const titulo = document.createElement("div");
-  titulo.className = "fw-semibold";
-  titulo.textContent = linea.titulo;
-  const artista = document.createElement("div");
-  artista.className = "small text-secondary";
-  artista.textContent = linea.artista;
-  textos.append(titulo, artista);
-
-  bloque.append(imagen, textos);
-  celdaDisco.append(bloque);
-
-  /* Unidades: se guardan al momento, al cambiar el campo */
-  const celdaUnidades = document.createElement("td");
-  const campo = document.createElement("input");
+  const campo = crearElemento("input", "form-control");
   campo.type = "number";
-  campo.className = "form-control campo-unidades";
   campo.min = 1;
   campo.max = linea.stock;
   campo.value = linea.unidades;
   campo.setAttribute("aria-label", "Unidades de " + linea.titulo);
-  campo.addEventListener("input", () => campo.classList.remove("is-invalid"));
-  campo.addEventListener("change", () => cambiarUnidades(linea, campo));
 
-  const error = document.createElement("div");
-  error.className = "invalid-feedback";
-  error.textContent = "De 1 a " + linea.stock + ".";
-  celdaUnidades.append(campo, error);
+  const mas = crearElemento("button", "btn btn-outline-secondary", "+");
+  mas.type = "button";
+  mas.setAttribute("aria-label", "Una unidad más de " + linea.titulo);
+  mas.disabled = linea.unidades >= linea.stock;
 
-  /* Quitar */
-  const celdaQuitar = document.createElement("td");
-  celdaQuitar.className = "text-end";
-  const boton = document.createElement("button");
-  boton.type = "button";
-  boton.className = "btn btn-sm btn-outline-danger";
-  boton.textContent = "Quitar";
-  boton.setAttribute("aria-label", "Quitar «" + linea.titulo + "» de la cesta");
-  boton.addEventListener("click", () => quitarDisco(linea, boton));
-  celdaQuitar.append(boton);
+  const botones = [menos, campo, mas];
+  menos.addEventListener("click", () => cambiarUnidades(linea, linea.unidades - 1, botones));
+  mas.addEventListener("click", () => cambiarUnidades(linea, linea.unidades + 1, botones));
+  campo.addEventListener("change", () => cambiarUnidades(linea, Number(campo.value), botones));
 
-  fila.append(
-    celdaDisco,
-    crearCelda(formatearPrecio(linea.precioCentimos), "text-end text-nowrap"),
-    celdaUnidades,
-    crearCelda(formatearPrecio(linea.subtotalCentimos), "text-end text-nowrap"),
-    celdaQuitar
+  grupo.append(menos, campo, mas);
+  return grupo;
+}
+
+/**
+ * Crea una línea del ticket: portada pequeña, título, artista con su formato, unidades, subtotal y quitar.
+ * En el móvil las unidades y el subtotal bajan a una segunda altura (flex-wrap).
+ * @param {object} linea
+ * @returns {HTMLDivElement}
+ */
+function crearLinea(linea) {
+  const fila = crearElemento("div", "linea d-flex flex-wrap flex-sm-nowrap align-items-center gap-3 py-3");
+
+  const imagen = crearElemento("img", "linea-portada rounded object-fit-cover");
+  imagen.src = linea.idImagen ? "/api/imagen.php?id=" + encodeURIComponent(linea.idImagen) : PORTADA_GENERICA;
+  imagen.alt = "Portada de " + linea.titulo;
+  imagen.width = 48;
+  imagen.height = 48;
+
+  /* min-width: 0 deja que el título se corte con "..." en vez de empujar lo demás */
+  const datos = crearElemento("div", "linea-datos flex-grow-1");
+  const debajo = crearElemento("div", "small text-secondary d-flex flex-wrap align-items-center gap-2");
+  debajo.append(crearElemento("span", "", linea.artista));
+  if (linea.formato) {
+    debajo.append(crearElemento("span", "insignia-formato", linea.formato));
+  }
+  datos.append(crearElemento("div", "fw-bold text-truncate", linea.titulo), debajo);
+
+  const quitar = crearElemento("button", "boton-quitar", "×");
+  quitar.type = "button";
+  quitar.title = "Quitar";
+  quitar.setAttribute("aria-label", "Quitar " + nombreConFormato(linea) + " de la cesta");
+  quitar.addEventListener("click", () => quitarDisco(linea, quitar));
+
+  const derecha = crearElemento("div", "d-flex align-items-center gap-3 ms-auto");
+  derecha.append(
+    crearUnidades(linea),
+    crearElemento("span", "linea-subtotal fw-bold text-end", formatearPrecio(linea.subtotalCentimos)),
+    quitar
   );
+
+  fila.append(imagen, datos, derecha);
   return fila;
+}
+
+/** Pinta debajo del total adónde se enviará el pedido (comprador) o que hace falta iniciar sesión (visitante). */
+function pintarEnvio() {
+  if (!esComprador) {
+    ui.envio.textContent = "Para confirmar el pedido tendrás que iniciar sesión.";
+    return;
+  }
+  ui.envio.textContent = textoDireccion ?? "Aún no tienes dirección de entrega: te la pediremos al confirmar.";
+}
+
+/**
+ * Lee la dirección del comprador una vez, para enseñarla en el ticket. Si falla, se queda sin ella:
+ * al confirmar se vuelve a comprobar de todas formas.
+ */
+async function cargarDireccion() {
+  if (!esComprador) {
+    return;
+  }
+  const respuesta = await pedirJson("/api/perfil.php");
+  const direccion = respuesta.ok ? respuesta.perfil.direccion : null;
+  if (direccion !== null) {
+    textoDireccion =
+      "Se enviará a: " + direccion.calle + ", " + direccion.codigoPostal + " " + direccion.localidad +
+      " (" + direccion.provincia + ").";
+  }
 }
 
 /**
@@ -228,30 +295,35 @@ async function cargarCesta() {
   ui.vacia.classList.toggle("d-none", !vacia);
   ui.contenido.classList.toggle("d-none", vacia);
 
-  ui.lineas.replaceChildren(...respuesta.lineas.map(crearFila));
+  ui.lineas.replaceChildren(...respuesta.lineas.map(crearLinea));
+  ui.articulos.textContent = textoArticulos(respuesta.unidadesCesta);
   ui.total.textContent = formatearPrecio(respuesta.totalCentimos);
+  pintarEnvio();
   return respuesta;
 }
 
 /**
  * Guarda las unidades nuevas de una línea y vuelve a pintar la cesta.
  * @param {object} linea
- * @param {HTMLInputElement} campo
+ * @param {number} unidades
+ * @param {HTMLElement[]} controles - El −, el campo y el +, que se desactivan mientras se guarda.
  */
-async function cambiarUnidades(linea, campo) {
+async function cambiarUnidades(linea, unidades, controles) {
   ui.aviso.classList.add("d-none");
 
-  /* Lo mismo que comprueba PHP, para avisar antes de enviar */
-  const unidades = Number(campo.value);
+  /* Lo mismo que comprueba PHP, para no enviar algo que no vale */
   const valido = Number.isInteger(unidades) && unidades >= 1 && unidades <= linea.stock;
-  campo.classList.toggle("is-invalid", !valido);
-  if (!valido || unidades === linea.unidades) {
+  if (!valido) {
+    mostrarAviso("De «" + linea.titulo + "» puedes pedir de 1 a " + linea.stock + " unidades.");
+    controles[1].value = linea.unidades;
+    return;
+  }
+  if (unidades === linea.unidades) {
     return;
   }
 
-  campo.disabled = true;
+  controles.forEach((control) => (control.disabled = true));
   const respuesta = await enviarJson("/api/cambiar_cesta.php", { idProducto: linea.idProducto, unidades: unidades });
-  campo.disabled = false;
 
   if (!respuesta.ok) {
     if (sinPermiso(respuesta.error)) {
@@ -285,6 +357,29 @@ async function quitarDisco(linea, boton) {
       mostrarAviso(textoError(respuesta.error));
     }
     return;
+  }
+
+  /* Se guarda lo quitado (con sus unidades) para poder deshacerlo desde el aviso */
+  ultimoQuitado = linea;
+  ui.textoQuitado.textContent = "Has quitado " + nombreConFormato(linea) + ".";
+  toastQuitado.show();
+
+  await cargarCesta();
+}
+
+/** "Deshacer": vuelve a añadir a la cesta lo último que se ha quitado, con las mismas unidades. */
+async function deshacerQuitar() {
+  if (ultimoQuitado === null) {
+    return;
+  }
+  const linea = ultimoQuitado;
+  ultimoQuitado = null;
+  toastQuitado.hide();
+  ui.aviso.classList.add("d-none");
+
+  const respuesta = await enviarJson("/api/anyadir_cesta.php", { idProducto: linea.idProducto, unidades: linea.unidades });
+  if (!respuesta.ok && !sinPermiso(respuesta.error)) {
+    mostrarAviso("No hemos podido volver a añadir " + nombreConFormato(linea) + ": " + textoError(respuesta.error));
   }
 
   await cargarCesta();
@@ -371,6 +466,10 @@ async function enviarPedido() {
   ui.avisoConfirmar.classList.remove("d-none");
 }
 
+/* Fecha del ticket: "14 de noviembre de 2026" */
+ui.fecha.textContent = new Intl.DateTimeFormat("es-ES", { dateStyle: "long" }).format(new Date());
+
 ui.botonConfirmar.addEventListener("click", pedirConfirmacion);
 ui.botonEnviar.addEventListener("click", enviarPedido);
-cargarCesta();
+ui.botonDeshacer.addEventListener("click", deshacerQuitar);
+cargarDireccion().then(cargarCesta);

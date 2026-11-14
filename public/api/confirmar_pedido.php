@@ -74,6 +74,7 @@ $pedido = [
         'idProducto'     => $linea['idProducto'],
         'titulo'         => $linea['titulo'],
         'artista'        => $linea['artista'],
+        'formato'        => $linea['formato'],
         'precioCentimos' => $linea['precioCentimos'],
         'unidades'       => $linea['unidades'],
     ], $revision['lineas']),

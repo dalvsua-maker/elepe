@@ -74,16 +74,16 @@ Guarda los datos de la persona que tiene la sesión iniciada.
 
 ### GET /api/productos.php
 
-Lista los discos, los más nuevos primero.
+Lista los discos, los más nuevos primero, con sus formatos juntos (fase 8). En Atlas cada formato (CD, Vinilo) es un documento de `productos`; este endpoint junta los que tienen el mismo título y artista en un solo disco.
 
-- **Quién:** cualquiera, también visitantes (lo usan la tienda y el panel del admin).
-- **Entrada (en la dirección, opcional):** `genero` (texto de 2 a 30 caracteres; solo devuelve los discos de ese género) y `limite` (de 1 a 50).
-- **200:** `{"ok": true, "productos": [{"id", "titulo", "artista", "anio", "genero", "descripcion", "precioCentimos", "stock", "idImagen"}]}`. `idImagen` es `null` si el disco no tiene portada; si la tiene, la imagen está en `/api/imagen.php?id=<idImagen>`.
-- **Errores:** 400 `GENERO_INVALIDO` o `DATOS_INVALIDOS` (`limite` no válido); 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
+- **Quién:** cualquiera, también visitantes (lo usan la tienda, el inicio y el panel del admin).
+- **Entrada (en la dirección, opcional):** `genero` (texto de 2 a 30 caracteres; los discos que lo tienen entre sus géneros), `q` (lo que se busca en el título y el artista, de 2 a 60 caracteres, sin importar mayúsculas ni tildes) y `limite` (de 1 a 50 discos).
+- **200:** `{"ok": true, "discos": [{"id", "titulo", "artista", "anio", "generos": ["Rock", ...], "descripcion", "idImagen", "formatos": [{"id", "formato", "precioCentimos", "stock"}]}]}`. `id` es el de su primer formato (sirve para editar o eliminar el disco); cada formato tiene su propio `id`, que es el que se añade a la cesta. Los formatos van siempre en el mismo orden (CD, Vinilo). `idImagen` es `null` si el disco no tiene portada; si la tiene, la imagen está en `/api/imagen.php?id=<idImagen>`.
+- **Errores:** 400 `GENERO_INVALIDO`, `BUSQUEDA_INVALIDA` o `DATOS_INVALIDOS` (`limite` no válido); 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
 
 ### GET /api/generos.php
 
-Lista los géneros que tienen algún disco. No hay una lista fija: un género existe mientras haya algún disco con él.
+Lista los géneros que tienen algún disco. No hay una lista fija: un género existe mientras haya algún disco con él. Cada disco tiene de 1 a 3 géneros (`generos`); este endpoint devuelve cada género suelto.
 
 - **Quién:** cualquiera, también visitantes (lo usa el filtro de la tienda).
 - **200:** `{"ok": true, "generos": ["Electrónica", "Jazz", "Nu metal", ...]}`, sin repetir y ordenados sin distinguir mayúsculas.
@@ -100,21 +100,21 @@ Devuelve la portada de un disco. La respuesta es la propia imagen, no JSON.
 
 ### POST /api/guardar_producto.php
 
-Crea un disco, o edita uno si llega `id`.
+Crea un disco, o edita uno si llega `id`. Guarda a la vez todos sus formatos: los datos comunes (título, artista, año, géneros, descripción y portada) van en cada documento de formato; precio y stock son de cada formato.
 
 - **Quién:** solo el administrador (401 sin sesión, 403 con otro rol).
-- **Entrada (formulario multipart, porque lleva un archivo):** `id` (solo al editar), `titulo`, `artista`, `anio`, `genero` (texto libre de 2 a 30 caracteres: uno que ya exista o uno nuevo; si ya existe con otras mayúsculas se guarda como está registrado), `descripcion`, `precio` (en euros: `24,99`, `24.99` o `24`; se guarda en céntimos), `stock` y `portada` (archivo opcional: JPG, PNG o WebP de hasta 500 KB). Al editar, si no llega `portada` se conserva la que tenía; si llega, sustituye a la anterior.
-- **201:** `{"ok": true, "id": "..."}` (disco nuevo). **200:** igual (disco editado).
-- **Errores:** 400 `TITULO_INVALIDO`, `ARTISTA_INVALIDO`, `ANIO_INVALIDO`, `GENERO_INVALIDO`, `DESCRIPCION_INVALIDA`, `PRECIO_INVALIDO`, `STOCK_INVALIDO`, `IMAGEN_INVALIDA` o `DATOS_INVALIDOS` (el `id` no tiene forma de id); 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO` (el `id` no existe); 405 `METODO_NO_PERMITIDO`; 409 `DISCO_REPETIDO` (ya hay otro disco con ese título y artista); 503 `BD_NO_DISPONIBLE`.
+- **Entrada (formulario multipart, porque lleva un archivo):** `id` (solo al editar: el de cualquiera de sus formatos), `titulo`, `artista`, `anio`, `generos[]` (de 1 a 3, cada uno de 2 a 30 caracteres: uno que ya exista o uno nuevo; si ya existe con otras mayúsculas se guarda como está registrado), `descripcion`, y por cada formato marcado `formatos[CD][activo]=si`, `formatos[CD][precio]` (en euros: `24,99`, `24.99` o `24`; se guarda en céntimos) y `formatos[CD][stock]` (y lo mismo con `Vinilo`; al menos uno), y `portada` (archivo opcional: JPG, PNG o WebP de hasta 500 KB, compartido por todos los formatos). Al editar: si no llega `portada` se conserva la que tenía; un formato que estaba y no llega marcado se borra; uno nuevo se crea con la fecha del disco (no sale como novedad).
+- **201:** `{"ok": true, "id": "..."}` (disco nuevo; el id de su primer formato). **200:** igual (disco editado).
+- **Errores:** 400 `TITULO_INVALIDO`, `ARTISTA_INVALIDO`, `ANIO_INVALIDO`, `GENEROS_INVALIDOS`, `DESCRIPCION_INVALIDA`, `FORMATOS_INVALIDOS` (ninguno marcado), `PRECIO_INVALIDO`, `STOCK_INVALIDO`, `IMAGEN_INVALIDA` o `DATOS_INVALIDOS` (el `id` no tiene forma de id); 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO` (el `id` no existe); 405 `METODO_NO_PERMITIDO`; 409 `DISCO_REPETIDO` (ya hay otro disco con ese título y artista) o `DISCO_EN_PEDIDO_PENDIENTE` (se quita un formato que está en un pedido pendiente: no se cambia nada); 503 `BD_NO_DISPONIBLE`.
 
 ### POST /api/eliminar_producto.php
 
-Borra un disco y su portada.
+Borra un disco entero (todos sus formatos) y su portada.
 
 - **Quién:** solo el administrador (401 sin sesión, 403 con otro rol).
-- **Entrada (JSON):** `id`.
+- **Entrada (JSON):** `id` (el de cualquiera de sus formatos).
 - **200:** `{"ok": true}`.
-- **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `DISCO_EN_PEDIDO_PENDIENTE` (el disco está en algún pedido pendiente: no se borra nada); 503 `BD_NO_DISPONIBLE`.
+- **Errores:** 400 `DATOS_INVALIDOS`; 401 `SIN_SESION`; 403 `SIN_PERMISO`; 404 `DISCO_NO_ENCONTRADO`; 405 `METODO_NO_PERMITIDO`; 409 `DISCO_EN_PEDIDO_PENDIENTE` (alguno de sus formatos está en un pedido pendiente: no se borra nada); 503 `BD_NO_DISPONIBLE`.
 
 ### POST /api/anyadir_cesta.php
 
@@ -130,7 +130,7 @@ Añade unidades de un disco a la cesta, que se guarda en la sesión del servidor
 Devuelve la cesta de la sesión con los datos actuales de cada disco (leídos de Atlas). Al leerla la limpia: quita los discos borrados y los agotados, baja las unidades al stock que queda y devuelve un aviso por cada cambio (la cesta corregida queda guardada).
 
 - **Quién:** visitante y comprador (el administrador: 403).
-- **200:** `{"ok": true, "lineas": [{"idProducto", "titulo", "artista", "precioCentimos", "unidades", "stock", "idImagen", "subtotalCentimos"}], "totalCentimos": 5998, "unidadesCesta": 2, "avisos": [...]}`. Cada aviso es `{"tipo": "ELIMINADO"}`, `{"tipo": "AGOTADO", "titulo": "..."}` o `{"tipo": "AJUSTADO", "titulo": "...", "stock": 2}`. Cesta vacía: `lineas` y `avisos` vacíos y totales a 0.
+- **200:** `{"ok": true, "lineas": [{"idProducto", "titulo", "artista", "formato", "precioCentimos", "unidades", "stock", "idImagen", "subtotalCentimos"}], "totalCentimos": 5998, "unidadesCesta": 2, "avisos": [...]}`. `idProducto` es el id de un formato. Cada aviso es `{"tipo": "ELIMINADO"}`, `{"tipo": "AGOTADO", "titulo": "Nevermind · Vinilo"}` o `{"tipo": "AJUSTADO", "titulo": "...", "stock": 2}` (el título lleva el formato). Cesta vacía: `lineas` y `avisos` vacíos y totales a 0.
 - **Errores:** 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
 
 ### POST /api/cambiar_cesta.php
@@ -165,7 +165,7 @@ Convierte la cesta en un pedido `pendiente`. Revisa la cesta con Atlas; si ha ca
 Lista los pedidos del comprador de la sesión, los más nuevos primero.
 
 - **Quién:** solo el comprador (401 al visitante, 403 al administrador). No recibe ningún id: el usuario sale de la sesión.
-- **200:** `{"ok": true, "pedidos": [{"id", "creadoEn", "estado", "totalCentimos", "direccion", "motivoRechazo", "detalleRechazo", "lineas": [{"idProducto", "titulo", "artista", "precioCentimos", "unidades", "idImagen"}]}]}`. `creadoEn` es texto ISO 8601 (`2026-11-12T20:48:00+00:00`). Título, artista y precio son la copia del momento de la compra; `idImagen` es la portada actual del disco, o `null` si ya no existe o no tiene.
+- **200:** `{"ok": true, "pedidos": [{"id", "creadoEn", "estado", "totalCentimos", "direccion", "motivoRechazo", "detalleRechazo", "lineas": [{"idProducto", "titulo", "artista", "formato", "precioCentimos", "unidades", "idImagen"}]}]}`. `creadoEn` es texto ISO 8601 (`2026-11-12T20:48:00+00:00`). Título, artista, formato y precio son la copia del momento de la compra (los pedidos anteriores a los formatos no tienen `formato`); `idImagen` es la portada actual del disco, o `null` si ya no existe o no tiene.
 - **Errores:** 401 `SIN_SESION`; 403 `SIN_PERMISO`; 405 `METODO_NO_PERMITIDO`; 503 `BD_NO_DISPONIBLE`.
 
 ### POST /api/volver_a_comprar.php

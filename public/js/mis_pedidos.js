@@ -123,7 +123,9 @@ function crearFilaLinea(linea) {
   imagen.height = 40;
   imagen.className = "rounded object-fit-cover";
   const textos = document.createElement("div");
-  textos.append(crear("div", "fw-semibold", linea.titulo), crear("div", "small text-secondary", linea.artista));
+  /* El formato va junto al artista (los pedidos anteriores a los formatos no lo tienen) */
+  const debajo = linea.formato ? linea.artista + " · " + linea.formato : linea.artista;
+  textos.append(crear("div", "fw-semibold", linea.titulo), crear("div", "small text-secondary", debajo));
   bloque.append(imagen, textos);
   celdaDisco.append(bloque);
 

@@ -22,7 +22,7 @@ require __DIR__ . '/../src/partes/cabecera.php';
   </div>
 </section>
 
-<!-- Novedades: los 3 últimos discos (los pinta inicio.js). El título lleva una línea que se alarga, como una balda.
+<!-- Novedades: los 6 últimos discos (los pinta inicio.js). El título lleva una línea que se alarga, como una balda.
      Si no se pueden cargar, la sección no se muestra -->
 <section class="py-5 d-none" id="novedades">
   <div class="container">
@@ -32,10 +32,11 @@ require __DIR__ . '/../src/partes/cabecera.php';
       <span class="balda flex-grow-1" aria-hidden="true"></span>
       <a class="text-nowrap" href="/tienda.php">Ver toda la tienda</a>
     </div>
-    <div class="row g-4" id="lista-novedades" data-puede-comprar="<?= $puedeComprar ? 'si' : 'no' ?>"></div>
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3" id="lista-novedades" data-puede-comprar="<?= $puedeComprar ? 'si' : 'no' ?>"></div>
   </div>
 </section>
 
+<?php require __DIR__ . '/../src/partes/modal_detalle.php'; ?>
 <?php require __DIR__ . '/../src/partes/modal_cesta.php'; ?>
 
 <script src="/js/fichas.js" defer></script>

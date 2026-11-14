@@ -5,7 +5,7 @@
  * Visitante y comprador (el administrador no compra). Devuelve la cesta de la sesión con los datos
  * actuales de cada disco, leídos de Atlas. Al leerla la limpia (Cesta::revisar): quita los discos
  * borrados y los agotados, baja las unidades al stock que queda y devuelve un aviso por cada cambio.
- * Respuestas: 200 {"ok":true,"lineas":[{"idProducto","titulo","artista","precioCentimos","unidades","stock",
+ * Respuestas: 200 {"ok":true,"lineas":[{"idProducto","titulo","artista","formato","precioCentimos","unidades","stock",
  *                  "idImagen","subtotalCentimos"}],"totalCentimos":5998,"unidadesCesta":2,
  *                  "avisos":[{"tipo":"ELIMINADO"},{"tipo":"AGOTADO","titulo":"..."},
  *                            {"tipo":"AJUSTADO","titulo":"...","stock":2}]}

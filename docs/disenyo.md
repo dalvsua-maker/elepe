@@ -67,13 +67,13 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 | Colección | Campos |
 |---|---|
 | `usuarios` | `nombre`, `apellidos`, `email` (índice único), `telefono`, `hashContrasena`, `rol`, `direccion` (`calle`, `codigoPostal`, `localidad`, `provincia`, o `null`), `creadoEn` |
-| `productos` | `titulo`, `artista` (índice único sobre los dos: no hay dos discos iguales), `anio`, `genero`, `descripcion`, `precioCentimos`, `stock`, `idImagen` (texto, o `null` si no tiene portada), `creadoEn` |
+| `productos` | **Un documento por formato de un disco** (fase 8): `titulo`, `artista`, `formato` (`CD` o `Vinilo`; índice único sobre los tres), `anio`, `generos` (lista de 1 a 3), `descripcion`, `precioCentimos`, `stock`, `idImagen` (texto, o `null`; la comparten los formatos), `busqueda` (título y artista en minúsculas y sin tildes), `creadoEn`. Los datos comunes son iguales en los formatos de un disco: el panel los guarda a la vez, y `api/productos.php` los junta en un disco con su lista de formatos |
 | `imagenes` | `tipoContenido`, `datos` (bytes), `creadoEn` |
 | `pedidos` | `idUsuario`, `comprador` (copia de `nombre`, `apellidos`, `email`, `telefono`), `direccion` (copia), `lineas`, `totalCentimos`, `estado`, `motivoRechazo`, `detalleRechazo`, `creadoEn`, `resueltoEn` |
 | `formularios` | `nombre`, `email`, `asunto`, `mensaje`, `idUsuario` (si había sesión), `creadoEn` |
 
-- Cada elemento de `lineas` lleva `idProducto`, `titulo`, `artista`, `precioCentimos` y `unidades`: es la copia del momento de la compra, así el historial y el panel se pintan sin volver a consultar `productos` ni `usuarios`.
-- **Valores:** `estado` ∈ {`pendiente`, `aceptado`, `rechazado`}; `rol` ∈ {`comprador`, `admin`}; `genero` es texto libre de 2 a 30 caracteres (los de la carga inicial son "Rock", "Jazz", "Pop" y "Electrónica"; el administrador puede crear más).
+- Cada elemento de `lineas` lleva `idProducto` (el id de un formato), `titulo`, `artista`, `formato`, `precioCentimos` y `unidades`: es la copia del momento de la compra, así el historial y el panel se pintan sin volver a consultar `productos` ni `usuarios`.
+- **Valores:** `estado` ∈ {`pendiente`, `aceptado`, `rechazado`}; `rol` ∈ {`comprador`, `admin`}; cada género de `generos` es texto libre de 2 a 30 caracteres (el administrador puede crear más); `formato` ∈ {`CD`, `Vinilo`}.
 - **Estados del pedido:** `pendiente` → `aceptado` o `rechazado`. No hay más: el comprador no cancela.
 
 ## 5. Flujo de compra y stock
@@ -90,10 +90,11 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 - Fuente Outfit (geométrica, como el logo) en toda la web: títulos en 700 y texto en 400 (alojada en `public/fonts/`, cargada con `@font-face`).
 - Contraste revisado con WCAG AA: texto 13,4 a 15,7; secundario 5,8 a 6,8; cromo 9,7 a 11,4; bordes de los campos 3,2 a 3,8 (mínimo 3).
 - Cabecera: logo a la izquierda, enlaces centrados (la página actual, subrayada) y cesta y cuenta a la derecha; en el móvil la cesta y la cuenta quedan a la vista y solo los enlaces van en el menú. El icono de la cuenta cambia con la sesión: contorno (visitante), relleno (comprador) y relleno con la etiqueta "admin". El admin ve sobre el icono el número de solicitudes pendientes (`api/pendientes.php`).
+- Cesta como un ticket de la tienda: logo, dirección y fecha arriba; líneas separadas con puntos (portada pequeña, título, artista y formato, unidades con − y +, subtotal y "×"); el total, los artículos y la dirección de entrega abajo. Al quitar un disco, un aviso permite deshacerlo.
 - Pie con los datos reales de la tienda: dirección (enlace a Google Maps), teléfono (`tel:`), menú, Instagram y Facebook, y el © con el año.
 - Iconos SVG propios en `public/img/`.
 - Idioma español, tono cercano, precios en euros con coma decimal (24,99 €).
-- Bootstrap en archivos locales (`bootstrap.min.css` y `bootstrap.bundle.min.js`), sin CDN. Componentes: navbar, dropdown, grid, card, badge, modal, formularios, tabla, nav-tabs y alert.
+- Bootstrap en archivos locales (`bootstrap.min.css` y `bootstrap.bundle.min.js`), sin CDN. Componentes: navbar, dropdown, grid, card, badge, modal, formularios, input-group, tabla, nav-tabs, alert y toast.
 
 ## 7. Entorno y despliegue
 
