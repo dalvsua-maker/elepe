@@ -24,8 +24,10 @@
 /* Tema oscuro de Bootstrap con los colores de Elepé */
 [data-bs-theme="dark"] {
   --bs-body-bg: var(--carbon);
+  --bs-body-bg-rgb: 20, 20, 22;
   --bs-body-color: var(--texto);
   --bs-tertiary-bg: var(--liston);
+  --bs-tertiary-bg-rgb: 35, 35, 38;
   --bs-border-color: var(--borde);
   --bs-secondary-rgb: 154, 158, 165;
   --bs-secondary-color: var(--cromo-oscuro);
@@ -188,3 +190,57 @@ h3,
   --bs-nav-link-color: var(--cromo);
   --bs-nav-link-hover-color: var(--cromo-claro);
 }
+
+/* Pie de página: títulos pequeños en cromo y enlaces del color del texto, que pasan a cromo al pasar el ratón */
+.pie-titulo {
+  margin-bottom: 0.75rem;
+  color: var(--cromo);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pie-enlace {
+  color: var(--texto);
+  line-height: 1.9;
+  text-decoration: none;
+}
+
+.pie-enlace:hover,
+.pie-enlace:focus-visible {
+  color: var(--cromo);
+  text-decoration: underline;
+}
+
+/* Antetítulo: texto pequeño en cromo y en mayúsculas encima de un título */
+.antetitulo {
+  margin-bottom: 0.5rem;
+  color: var(--cromo);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Portada del inicio: la foto de las cubetas a casi toda la pantalla, con un velo oscuro
+   para que el texto se lea y fundida con el fondo de la página por abajo */
+.portada-inicio {
+  height: min(85vh, 48rem);
+  min-height: 28rem;
+  background-image:
+    linear-gradient(180deg, rgba(20, 20, 22, 0.55) 0%, rgba(20, 20, 22, 0.7) 70%, var(--carbon) 100%),
+    url("../img/tienda/interior-cubetas.webp");
+  background-position: center;
+  background-size: cover;
+}
+
+/* Párrafo de la portada: estrecho para que las líneas no sean demasiado largas */
+.entradilla {
+  max-width: 38rem;
+}
+
+/* Línea cromada que se alarga junto al título de Novedades, como una balda */
+.balda {
+  height: 2px;
+  background-color: var(--cromo);
+}
+

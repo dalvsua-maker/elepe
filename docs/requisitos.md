@@ -63,7 +63,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 ### Contacto y landing
 - **RF-26:** El formulario de contacto pide nombre (3 a 30), email, asunto (lista fija) y mensaje (10 a 500 caracteres, con contador), valida en JS y PHP y lleva a la página "Gracias", que saluda por el nombre y tiene un botón para volver al inicio. Con sesión, el nombre y el email llegan rellenos con los de la cuenta (se pueden cambiar). "Gracias" solo se ve justo después de enviar un mensaje.
 - **RF-27:** Los mensajes de contacto se guardan en Atlas (colección `formularios`), con el id del usuario si había sesión.
-- **RF-28:** La landing tiene una cabecera con el botón "Ver tienda", pie de página y "Novedades" (los 3 últimos discos, con la misma ficha de la tienda; si no se pueden cargar, la sección no se muestra).
+- **RF-28:** La landing tiene una portada con una foto de la tienda, el texto "Desde 1979 en el centro de Vigo" y los botones "Ver tienda" y "Cómo llegar", pie de página y "Novedades" (los 3 últimos discos, con la misma ficha de la tienda; si no se pueden cargar, la sección no se muestra).
 
 ## 5. Requisitos no funcionales
 
