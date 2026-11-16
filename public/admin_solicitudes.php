@@ -5,7 +5,7 @@ require_once __DIR__ . '/../src/Sesion.php';
 /* Solo el administrador */
 Sesion::exigirRolPagina(['admin']);
 
-$titulo = 'Solicitudes · Elepe';
+$titulo = 'Solicitudes · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 

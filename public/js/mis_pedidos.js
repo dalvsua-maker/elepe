@@ -15,11 +15,11 @@ const modalVolver = bootstrap.Modal.getOrCreateInstance(ui.modalVolver);
 
 const PORTADA_GENERICA = "/img/disco.svg";
 
-/* Etiqueta y color (clase de Bootstrap) del badge de cada estado */
+/* Etiqueta y clase del badge de cada estado (los estilos están en estilos.css) */
 const estados = {
-  pendiente: { texto: "Pendiente", clase: "text-bg-warning" },
-  aceptado: { texto: "Aceptado", clase: "text-bg-success" },
-  rechazado: { texto: "Rechazado", clase: "text-bg-danger" },
+  pendiente: { texto: "Pendiente", clase: "estado-pendiente" },
+  aceptado: { texto: "Aceptado", clase: "estado-aceptado" },
+  rechazado: { texto: "Rechazado", clase: "estado-rechazado" },
 };
 
 /* Mensajes para los errores que devuelve el servidor */

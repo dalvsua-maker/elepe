@@ -198,7 +198,21 @@ function crearFila(disco) {
   botonPortada.append(imagen);
   celdaPortada.append(botonPortada);
 
+  /* En el móvil, el artista va debajo del título y los botones, debajo del artista (sus columnas se esconden) */
+  const celdaTitulo = crearCelda(disco.titulo);
+  const artistaMovil = document.createElement("div");
+  artistaMovil.className = "small text-secondary d-md-none";
+  artistaMovil.textContent = disco.artista;
+  const accionesMovil = document.createElement("div");
+  accionesMovil.className = "d-sm-none mt-2";
+  accionesMovil.append(
+    crearBoton("Editar", "btn-outline-light me-2", () => abrirFormulario(disco)),
+    crearBoton("Eliminar", "btn-outline-danger", () => pedirConfirmacionEliminar(disco))
+  );
+  celdaTitulo.append(artistaMovil, accionesMovil);
+
   const celdaGeneros = document.createElement("td");
+  celdaGeneros.className = "d-none d-md-table-cell";
   for (const genero of disco.generos) {
     const insignia = document.createElement("span");
     insignia.className = "badge text-bg-secondary me-1";
@@ -220,13 +234,13 @@ function crearFila(disco) {
   }
 
   const celdaAcciones = document.createElement("td");
-  celdaAcciones.className = "text-end text-nowrap";
+  celdaAcciones.className = "text-end text-nowrap d-none d-sm-table-cell";
   celdaAcciones.append(
     crearBoton("Editar", "btn-outline-light me-2", () => abrirFormulario(disco)),
     crearBoton("Eliminar", "btn-outline-danger", () => pedirConfirmacionEliminar(disco))
   );
 
-  fila.append(celdaPortada, crearCelda(disco.titulo), crearCelda(disco.artista), celdaGeneros, celdaFormatos, celdaAcciones);
+  fila.append(celdaPortada, celdaTitulo, crearCelda(disco.artista, "d-none d-md-table-cell"), celdaGeneros, celdaFormatos, celdaAcciones);
   return fila;
 }
 

@@ -11,38 +11,40 @@ if (Sesion::rol() !== 'visitante') {
 /* Conserva "volver" en el enlace al registro, para no perder el camino de vuelta a la cesta */
 $volver = is_string($_GET['volver'] ?? null) ? '?volver=' . urlencode($_GET['volver']) : '';
 
-$titulo = 'Iniciar sesión · Elepe';
+$titulo = 'Iniciar sesión · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 
-<!-- Formulario de inicio de sesión -->
+<!-- Inicio de sesión: una caja centrada con el logo, el formulario y el enlace al registro -->
 <section class="py-5">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-5">
-        <h1 class="h2 mb-4">Iniciar sesión</h1>
-
-        <form id="formulario-login" novalidate>
-          <div class="row g-3">
-            <div class="col-12">
-              <label for="email" class="form-label">Email</label>
-              <input type="email" class="form-control" id="email" autocomplete="email" required>
-              <div class="invalid-feedback">Escribe un email válido.</div>
-            </div>
-            <div class="col-12">
-              <label for="contrasena" class="form-label">Contraseña</label>
-              <input type="password" class="form-control" id="contrasena" maxlength="72" autocomplete="current-password" required>
-              <div class="invalid-feedback">Escribe tu contraseña.</div>
-            </div>
-          </div>
-
-          <div id="aviso" class="alert alert-danger mt-3 d-none" role="alert"></div>
-
-          <button type="submit" id="boton-login" class="btn btn-primary mt-4">Entrar</button>
-        </form>
-
-        <p class="mt-4 mb-0">¿No tienes cuenta? <a href="/registro.php<?= htmlspecialchars($volver) ?>">Regístrate</a></p>
+  <div class="container zona-caja-estrecha">
+    <div class="caja">
+      <div class="text-center mb-4">
+        <a href="/" class="d-inline-block mb-3"><img src="/img/logo.svg" alt="Elepé · Ir al inicio" width="110" height="40"></a>
+        <h1 class="h3 mb-1">Iniciar sesión</h1>
+        <p class="text-secondary mb-0">Entra para confirmar tus pedidos y seguir su estado.</p>
       </div>
+
+      <form id="formulario-login" novalidate>
+        <div class="row g-3">
+          <div class="col-12">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" autocomplete="email" required>
+            <div class="invalid-feedback">Escribe un email válido.</div>
+          </div>
+          <div class="col-12">
+            <label for="contrasena" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="contrasena" maxlength="72" autocomplete="current-password" required>
+            <div class="invalid-feedback">Escribe tu contraseña.</div>
+          </div>
+        </div>
+
+        <div id="aviso" class="alert alert-danger mt-3 d-none" role="alert"></div>
+
+        <button type="submit" id="boton-login" class="btn btn-primary w-100 mt-4">Entrar</button>
+      </form>
+
+      <p class="caja-pie text-center mt-4 pt-4 mb-0">¿No tienes cuenta? <a href="/registro.php<?= htmlspecialchars($volver) ?>">Regístrate</a></p>
     </div>
   </div>
 </section>

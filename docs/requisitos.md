@@ -96,5 +96,5 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 | 5 | Cesta (ver, cambiar unidades y quitar) | Cerrada (12/11/2026) |
 | 6 | Pedidos y solicitudes (confirmar, mis pedidos, volver a comprar, solicitudes del admin) | Cerrada (12/11/2026) |
 | 7 | Contacto y "Gracias" | Cerrada (13/11/2026) |
-| 8 | Landing y pulido visual | En curso (novedades hechas) |
+| 8 | Landing y pulido visual | Cerrada (16/11/2026) |
 | 9 | Pruebas, documentación final y despliegue | Pendiente |

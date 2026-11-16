@@ -8,7 +8,7 @@ Sesion::exigirRolPagina(['visitante', 'comprador']);
 /* Solo el comprador confirma; el visitante verá el modal de iniciar sesión */
 $esComprador = Sesion::rol() === 'comprador';
 
-$titulo = 'Cesta · Elepe';
+$titulo = 'Cesta · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 

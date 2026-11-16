@@ -25,11 +25,11 @@ const modalRechazar = bootstrap.Modal.getOrCreateInstance(ui.modalRechazar);
 /* Motivo que obliga a escribir un detalle (el mismo texto que en PHP) */
 const MOTIVO_OTRO = "Otro";
 
-/* Etiqueta y color (clase de Bootstrap) del badge de cada estado */
+/* Etiqueta y clase del badge de cada estado (los estilos están en estilos.css) */
 const estados = {
-  pendiente: { texto: "Pendiente", clase: "text-bg-warning" },
-  aceptado: { texto: "Aceptado", clase: "text-bg-success" },
-  rechazado: { texto: "Rechazado", clase: "text-bg-danger" },
+  pendiente: { texto: "Pendiente", clase: "estado-pendiente" },
+  aceptado: { texto: "Aceptado", clase: "estado-aceptado" },
+  rechazado: { texto: "Rechazado", clase: "estado-rechazado" },
 };
 
 /* Pedido que se va a rechazar */

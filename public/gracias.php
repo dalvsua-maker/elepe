@@ -14,7 +14,7 @@ if ($nombre === null) {
 /* Las novedades usan la misma ficha que la tienda: el administrador las ve, pero no puede comprarlas */
 $puedeComprar = Sesion::rol() !== 'admin';
 
-$titulo = 'Gracias · Elepe';
+$titulo = 'Gracias · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 

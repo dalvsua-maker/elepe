@@ -5,7 +5,7 @@ require_once __DIR__ . '/../src/Sesion.php';
 /* Las novedades usan la misma ficha que la tienda: el administrador las ve, pero no puede comprarlas */
 $puedeComprar = Sesion::rol() !== 'admin';
 
-$titulo = 'Elepe · Discos y vinilos';
+$titulo = 'Elepé · Discos y vinilos';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 

@@ -8,7 +8,7 @@ Sesion::exigirRolPagina(['comprador']);
 /* Viene de confirmar un pedido: se compara con un valor fijo, nunca se escribe en la página */
 $pedidoEnviado = ($_GET['enviado'] ?? '') === '1';
 
-$titulo = 'Mis pedidos · Elepe';
+$titulo = 'Mis pedidos · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 

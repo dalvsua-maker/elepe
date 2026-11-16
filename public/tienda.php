@@ -5,7 +5,7 @@ require_once __DIR__ . '/../src/Sesion.php';
 /* La tienda es pública. El administrador ve los discos, pero no puede comprarlos */
 $puedeComprar = Sesion::rol() !== 'admin';
 
-$titulo = 'Tienda · Elepe';
+$titulo = 'Tienda · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 

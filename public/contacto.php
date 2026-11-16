@@ -6,7 +6,7 @@ require_once __DIR__ . '/../src/Validador.php';
 /* Abierta a todos. Con sesión, contacto.js pide el perfil para rellenar el nombre y el email */
 $conSesion = Sesion::rol() !== 'visitante';
 
-$titulo = 'Contacto · Elepe';
+$titulo = 'Contacto · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 

@@ -6,7 +6,7 @@ require_once __DIR__ . '/../src/Validador.php';
 /* Solo el administrador */
 Sesion::exigirRolPagina(['admin']);
 
-$titulo = 'Discos · Elepe';
+$titulo = 'Discos · Elepé';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 
@@ -22,16 +22,18 @@ require __DIR__ . '/../src/partes/cabecera.php';
     <div id="exito" class="alert alert-success d-none" role="status"></div>
 
     <!-- Tabla de discos (la rellena admin_discos.js) -->
+    <!-- En el móvil se esconden el artista y los géneros (el artista pasa debajo del título)
+         y los botones bajan a la celda del título, para que la tabla quepa sin desplazarse -->
     <div class="table-responsive">
       <table class="table table-hover align-middle">
         <thead>
           <tr>
             <th scope="col">Portada</th>
             <th scope="col">Título</th>
-            <th scope="col">Artista</th>
-            <th scope="col">Géneros</th>
-            <th scope="col">Formatos (precio · stock)</th>
-            <th scope="col" class="text-end">Acciones</th>
+            <th scope="col" class="d-none d-md-table-cell">Artista</th>
+            <th scope="col" class="d-none d-md-table-cell">Géneros</th>
+            <th scope="col">Formatos <span class="d-none d-sm-inline">(precio · stock)</span></th>
+            <th scope="col" class="text-end d-none d-sm-table-cell">Acciones</th>
           </tr>
         </thead>
         <tbody id="tabla-discos"></tbody>

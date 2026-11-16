@@ -34,6 +34,10 @@
   --bs-link-color-rgb: 201, 204, 209;
   --bs-link-hover-color-rgb: 238, 240, 243;
   --bs-body-font-family: "Outfit", system-ui, sans-serif;
+  /* Rojo apagado para los errores (texto en rojo, campos mal escritos): se lee bien sobre el carbón sin chillar */
+  --bs-danger-rgb: 224, 138, 130;
+  --bs-form-invalid-color: #e08a82;
+  --bs-form-invalid-border-color: #e08a82;
 }
 
 /* Cabecera: listones verticales, como la fachada donde va el rótulo */
@@ -222,12 +226,19 @@ h3,
   max-width: 22rem;
 }
 
-/* Cesta: un ticket de la tienda centrado, con líneas de puntos como un recibo */
-.zona-ticket {
+/* Cesta: un ticket de la tienda centrado, con líneas de puntos como un recibo.
+   Las páginas de cuenta (iniciar sesión, registro, mis datos) usan la misma caja, sin ser un ticket */
+.zona-ticket,
+.zona-caja {
   max-width: 40rem;
 }
 
-.ticket {
+.zona-caja-estrecha {
+  max-width: 28rem;
+}
+
+.ticket,
+.caja {
   padding: 2rem 1.5rem;
   border: 1px solid var(--borde);
   border-radius: 0.5rem;
@@ -243,6 +254,11 @@ h3,
 }
 
 .ticket-total {
+  border-top: 2px dashed var(--borde-campo);
+}
+
+/* Separación de puntos dentro de una caja (el enlace a la otra página, la dirección de entrega) */
+.caja-pie {
   border-top: 2px dashed var(--borde-campo);
 }
 
@@ -387,4 +403,90 @@ h3,
 .boton-portada:focus-visible {
   outline: 2px solid var(--cromo);
   outline-offset: 2px;
+}
+
+/* Avisos (alert de Bootstrap): sobre el color de los listones y con una franja a la izquierda que dice qué son.
+   Éxito en cromo, advertencia en cromo oscuro y error en el rojo apagado */
+.alert-success,
+.alert-warning,
+.alert-danger {
+  --bs-alert-color: var(--texto);
+  --bs-alert-bg: var(--liston);
+  --bs-alert-border-color: var(--borde);
+  --bs-alert-link-color: var(--cromo-claro);
+  border-left-width: 4px;
+}
+
+.alert-success {
+  border-left-color: var(--cromo);
+}
+
+.alert-warning {
+  border-left-color: var(--cromo-oscuro);
+}
+
+.alert-danger {
+  --bs-alert-bg: #2a1d1c;
+  --bs-alert-border-color: #4a2f2c;
+  border-left-color: #e08a82;
+}
+
+/* Dentro de una caja (que ya es del color de los listones), los avisos de éxito y advertencia van sobre el carbón
+   para que se distingan */
+.caja .alert-success,
+.caja .alert-warning {
+  --bs-alert-bg: var(--carbon);
+}
+
+/* Botones de peligro (eliminar, rechazar) en el rojo apagado */
+.btn-danger {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #a8463f;
+  --bs-btn-border-color: #a8463f;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #b9544c;
+  --bs-btn-hover-border-color: #b9544c;
+  --bs-btn-active-bg: #b9544c;
+  --bs-btn-active-border-color: #b9544c;
+  --bs-btn-focus-shadow-rgb: 224, 138, 130;
+}
+
+.btn-outline-danger {
+  --bs-btn-color: #e08a82;
+  --bs-btn-border-color: #a8463f;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #a8463f;
+  --bs-btn-hover-border-color: #a8463f;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #a8463f;
+  --bs-btn-active-border-color: #a8463f;
+  --bs-btn-focus-shadow-rgb: 224, 138, 130;
+}
+
+/* Estado de un pedido (Mis pedidos y Solicitudes): se distinguen por la forma y el símbolo, no solo por el color.
+   El símbolo va en ::before con un texto alternativo vacío ("/ ''"), así los lectores de pantalla solo leen la palabra */
+.estado-pendiente {
+  border: 1px solid var(--cromo);
+  background-color: transparent;
+  color: var(--cromo);
+}
+
+.estado-aceptado {
+  border: 1px solid var(--cromo);
+  background-color: var(--cromo);
+  color: var(--carbon);
+}
+
+.estado-aceptado::before {
+  content: "✓ " / "";
+}
+
+.estado-rechazado {
+  border: 1px solid var(--borde-campo);
+  background-color: var(--borde);
+  color: var(--texto);
+}
+
+.estado-rechazado::before {
+  content: "✕ " / "";
 }
