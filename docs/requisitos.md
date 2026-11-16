@@ -1,15 +1,17 @@
-# Elepe — Requisitos
+# Elepé — Requisitos
+
+**Estado:** versión final (16/11/2026).
 
 ## 1. Descripción del proyecto
 
-Elepe es una tienda online de discos y vinilos (el nombre suena como "LP"). La web tiene un Home (landing), una Tienda y un Contacto. Los usuarios se registran como compradores, llenan una cesta y envían pedidos; el administrador gestiona los discos desde la propia página y acepta o rechaza los pedidos.
+Elepé es una tienda online de discos y vinilos (el nombre suena como "LP"), inspirada en una tienda real de Vigo y con su misma estética. La web tiene un Home (landing), una Tienda y un Contacto. Los usuarios se registran como compradores, llenan una cesta y envían pedidos; el administrador gestiona los discos desde la propia página y acepta o rechaza los pedidos.
 
 Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de datos: **MongoDB Atlas**. Docker y Composer se usan en desarrollo y despliegue.
 
 ## 2. Normas de trabajo
 
 1. Solo se usan HTML, CSS, Bootstrap, JS, PHP y MongoDB Atlas. No se añade ninguna otra librería, framework ni servicio.
-2. Se avanza por fases; cada una termina con una funcionalidad completa que se puede probar en el navegador.
+2. El proyecto se desarrolló por fases; cada una terminó con una funcionalidad completa que se podía probar en el navegador (ver el apartado 7).
 3. Cada paso terminado y probado se guarda en un commit.
 4. El repositorio es público: ningún secreto se sube a Git (`.env` está en `.gitignore`).
 
@@ -37,7 +39,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RF-07:** La dirección de entrega (`calle`, `codigoPostal`, `localidad`, `provincia`) se rellena en el perfil y es obligatoria para confirmar un pedido.
 
 ### Tienda
-- **RF-08:** Cada disco se vende en uno o dos formatos (CD y Vinilo), cada uno con su precio y su stock, y tiene de 1 a 3 géneros. Los géneros no son una lista fija: el administrador puede crear otros al añadir o editar un disco. El catálogo inicial lo carga un script (se ampliará a unos 50 discos).
+- **RF-08:** Cada disco se vende en uno o dos formatos (CD y Vinilo), cada uno con su precio y su stock, y tiene de 1 a 3 géneros. Los géneros no son una lista fija: el administrador puede crear otros al añadir o editar un disco. El catálogo inicial (14 discos) lo carga un script.
 - **RF-09:** Cada disco se muestra en una tarjeta pequeña (6 por fila en escritorio) con portada, título, artista, precio ("desde" el formato más barato) y los formatos que tiene. Al pulsarla se abre su detalle: portada, artista y año, géneros, descripción, selector de formato (cambia precio y stock), selector de unidades (de 1 al stock del formato) y botón "Añadir a la cesta". Si un formato no tiene stock, muestra "Agotado". El administrador ve el detalle, pero sin unidades ni botón.
 - **RF-10:** La tienda se puede filtrar por género y buscar por título o artista (mientras se escribe, sin importar mayúsculas ni tildes); los dos se pueden combinar. El filtro y la búsqueda los hace el servidor, y los botones del filtro salen de los géneros que tienen discos en ese momento.
 - **RF-11:** El visitante puede añadir discos a la cesta igual que un comprador. Al pulsar "Confirmar pedido" ve un modal "Inicia sesión para confirmar tu pedido" con enlaces a iniciar sesión y registrarse, y tras entrar vuelve a la cesta con su contenido.
@@ -48,7 +50,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RF-14:** Precio y stock se leen siempre de la base de datos; el pedido copia el precio del momento de confirmar.
 - **RF-15:** Antes de enviar el pedido se pide confirmación en un modal con el total del momento. Al confirmar, el stock se descuenta y el pedido queda en estado `pendiente`; el comprador va a "Mis pedidos" con el aviso "Pedido enviado". Sin dirección de entrega no se puede confirmar: se avisa y se manda a "Mis datos", desde donde puede volver a la cesta.
 - **RF-16:** Si al confirmar falta stock en alguna línea, no se crea ningún pedido: se avisa de la línea afectada y se ajustan sus unidades.
-- **RF-17:** El historial muestra todos los pedidos del comprador con su estado (Pendiente, Aceptado o Rechazado). Los rechazados muestran el motivo y el detalle.
+- **RF-17:** El historial muestra todos los pedidos del comprador, del más nuevo al más antiguo, con su estado (Pendiente, ✓ Aceptado o ✕ Rechazado) y el detalle de cada uno (discos, formato, unidades, precios y dirección). Los rechazados muestran el motivo y el detalle.
 - **RF-18:** "Volver a comprar" mete los discos de un pedido en la cesta (con las unidades limitadas al stock actual) y lleva a la cesta para revisar y confirmar.
 
 ### Administración
@@ -63,7 +65,7 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 ### Contacto y landing
 - **RF-26:** El formulario de contacto pide nombre (3 a 30), email, asunto (lista fija) y mensaje (10 a 500 caracteres, con contador), valida en JS y PHP y lleva a la página "Gracias", que saluda por el nombre, lleva a la tienda o al inicio y enseña las novedades. Junto al formulario están los datos de la tienda física (dirección, teléfono, Instagram y cómo llegar). Con sesión, el nombre y el email llegan rellenos con los de la cuenta (se pueden cambiar). "Gracias" solo se ve justo después de enviar un mensaje.
 - **RF-27:** Los mensajes de contacto se guardan en Atlas (colección `formularios`), con el id del usuario si había sesión.
-- **RF-28:** La landing tiene una portada con una foto de la tienda, el texto "Desde 1979 en el centro de Vigo" y los botones "Ver tienda" y "Cómo llegar", pie de página y "Novedades" (los 3 últimos discos, con la misma ficha de la tienda; si no se pueden cargar, la sección no se muestra).
+- **RF-28:** La landing tiene una portada con una foto de la tienda, el texto "Desde 1979 en el centro de Vigo" y los botones "Ver tienda" y "Cómo llegar", pie de página y "Novedades" (los 6 últimos discos, con la misma tarjeta de la tienda; si no se pueden cargar, la sección no se muestra). El pie de todas las páginas tiene la dirección, el teléfono y las redes sociales de la tienda.
 
 ## 5. Requisitos no funcionales
 
@@ -74,15 +76,20 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 - **RNF-05:** Las contraseñas se guardan con `password_hash` y se comprueban con `password_verify`; nunca se guarda la contraseña.
 - **RNF-06:** El dinero se guarda como entero en céntimos para evitar errores de decimales.
 - **RNF-07:** Si Atlas falla, el servidor responde `BD_NO_DISPONIBLE` (503) y el detalle va al registro del servidor.
-- **RNF-08:** Funciona en las versiones actuales de Chrome y Firefox en ordenador.
+- **RNF-08:** Funciona en las versiones actuales de Chrome, Edge y Firefox, en ordenador y en el móvil (desde 375 px de ancho), sin desplazamiento lateral.
+- **RNF-09:** El contraste de textos y bordes cumple WCAG AA, y los estados no dependen solo del color (los pedidos llevan símbolo y forma distintos).
 
 ## 6. Limitaciones conocidas
 
-- Si el servidor se cae justo entre un descuento de stock y su devolución, puede quedar stock descontado sin pedido (la mejora sería una transacción de MongoDB).
+- Si el servidor se cae justo entre un descuento de stock y su devolución, puede quedar stock descontado sin pedido (la mejora sería una transacción de MongoDB). Lo mismo al guardar un disco con varios formatos (son varias escrituras) o entre guardar una portada y su disco (quedaría una imagen sin disco).
 - No hay pasarela de pago ni datos de pago.
 - El comprador no puede cancelar pedidos.
 - Los mensajes de contacto solo se consultan en Atlas.
-- En un despliegue con servicio gratuito, las sesiones se pierden cuando el servicio se duerme o se reinicia.
+- En un despliegue con servicio gratuito, las sesiones se pierden cuando el servicio se duerme o se reinicia (y con ellas la cesta).
+- El login no limita los intentos y no hay protección CSRF; tampoco hay límite de mensajes de contacto por persona.
+- Una portada se puede sustituir, pero no quitar.
+- Rechazar un pedido devuelve siempre el stock, también con el motivo "Sin stock real".
+- Si Atlas no responde, el inicio y "Gracias" no muestran las novedades y el administrador no ve el número de solicitudes pendientes (sin mensaje de error).
 
 ## 7. Estado de las fases
 
@@ -96,5 +103,5 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 | 5 | Cesta (ver, cambiar unidades y quitar) | Cerrada (12/11/2026) |
 | 6 | Pedidos y solicitudes (confirmar, mis pedidos, volver a comprar, solicitudes del admin) | Cerrada (12/11/2026) |
 | 7 | Contacto y "Gracias" | Cerrada (13/11/2026) |
-| 8 | Landing y pulido visual | Cerrada (16/11/2026) |
-| 9 | Pruebas, documentación final y despliegue | Pendiente |
+| 8 | Landing y aspecto visual (identidad de la tienda, formatos CD y Vinilo, varios géneros y buscador) | Cerrada (16/11/2026) |
+| 9 | Documentación final | Hecha (16/11/2026). Las pruebas manuales están en `pruebas.md`; la web se ejecuta en local (sin despliegue público) |

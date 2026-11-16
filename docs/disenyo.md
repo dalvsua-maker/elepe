@@ -1,13 +1,14 @@
-# Elepe — Diseño
+# Elepé — Diseño
 
 ## Decisiones de diseño
 
 - **Arquitectura:** páginas `.php` que montan el HTML (la cabecera según el rol, leído de la sesión) y datos por `fetch` a `api/` en JSON. PHP decide y protege; JS muestra y avisa.
-- **Piezas reutilizadas de un proyecto anterior:** `BaseDeDatos`, `Respuesta`, `Validador` y `pedirJson()`, más una clase nueva `Sesion`.
+- **Piezas reutilizadas de un proyecto anterior:** `BaseDeDatos`, `Respuesta`, `Validador` y `pedirJson()`, más dos clases nuevas: `Sesion` (todo lo que toca `$_SESSION`) y `Cesta` (revisar la cesta contra la base de datos).
 - **Nombres en español:** colecciones, campos y valores de Mongo, variables y funciones, sin tildes ni ñ en los nombres (`anio`, `contrasena`). Los valores sí pueden llevarlas (`"Electrónica"`).
 - **Dinero:** entero en céntimos (`precioCentimos`, `totalCentimos`); el admin escribe euros y PHP separa euros y céntimos como texto (`24,99` → `2499`), sin decimales de coma flotante.
 - **Imágenes:** se guardan en Atlas (colección `imagenes`), no en disco, porque el disco de un servicio gratuito se pierde en cada reinicio.
 - **Stock:** se descuenta al confirmar el pedido, no al añadir a la cesta; si el admin rechaza el pedido, se devuelve.
+- **Formatos:** cada formato de un disco (CD, Vinilo) es un documento de `productos` con su precio y su stock; la API los junta en un disco. Así la cesta, los pedidos y el descuento de stock trabajan siempre con un solo id.
 - **Visitante y cesta:** el visitante puede añadir a la cesta (que vive en su sesión de PHP), pero solo el comprador puede confirmar el pedido. Como la cesta no descuenta stock, una cesta abandonada no bloquea discos.
 
 ## 1. Estructura de carpetas y ficheros
@@ -22,21 +23,23 @@ TiendaOnline/
 │   ├── mis_pedidos.php                                  (comprador)
 │   ├── admin_discos.php, admin_solicitudes.php          (admin)
 │   ├── css/    bootstrap.min.css, estilos.css
-│   ├── js/     bootstrap.bundle.min.js, api.js, cabecera.js, un .js por página
-│   ├── img/    SVG propios (cesta, persona, logo, disco genérico)
+│   ├── js/     bootstrap.bundle.min.js, api.js, cabecera.js, fichas.js, un .js por página
+│   ├── img/    SVG propios (logo, favicon, cesta, persona, disco genérico) y tienda/ (fotos de la tienda física)
 │   ├── fonts/  Outfit y su licencia
 │   └── api/    endpoints PHP (ver contrato.md)
 ├── src/                            ← PHP interno, sin URL
 │   ├── config.php, BaseDeDatos.php, Respuesta.php, Validador.php
-│   ├── Sesion.php
-│   └── partes/ cabecera.php, pie.php
-├── scripts/ preparar_bd.php, crear_cuenta.php, cargar_discos.php   ← fuera de public/
+│   ├── Sesion.php, Cesta.php
+│   └── partes/ cabecera.php, pie.php, modal_detalle.php, modal_cesta.php
+├── scripts/ preparar_bd.php, crear_cuenta.php, cargar_discos.php, migrar_formatos.php   ← fuera de public/
 ├── docs/   requisitos, disenyo, contrato, pruebas
 └── Dockerfile, docker-compose.yml, .dockerignore, .gitignore,
     .env, .env.example, composer.json, composer.lock, README.md
 ```
 
-Los archivos se crean fase a fase; el estado de cada fase está en `requisitos.md`.
+- `api.js`: `pedirJson()`, `enviarJson()` y `enviarFormulario()` (fetch con un tiempo máximo de 8 s).
+- `cabecera.js` (todas las páginas): cerrar sesión, número de la cesta y aviso de solicitudes pendientes del admin.
+- `fichas.js` (tienda, inicio y "Gracias"): la tarjeta de un disco, su ventana de detalle y "Añadir a la cesta".
 
 Los nombres de archivo van en español, en minúsculas y con guion bajo.
 
@@ -50,7 +53,19 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 
 - **Cabecera:** Inicio · Tienda · Contacto, icono de cesta (con `badge` del total de unidades de la cesta; lo ven el visitante y el comprador, no el admin) e icono de persona (menú desplegable).
 - **Menú de la persona:** visitante → "Iniciar sesión" y "Registrarse"; comprador → "Mis datos", "Mis pedidos" y "Cerrar sesión"; admin → "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión".
-- Un usuario con sesión que abre "Iniciar sesión" o "Registrarse" va al inicio.
+- Un usuario con sesión que abre "Iniciar sesión" o "Registrarse" va al inicio (o a la cesta, si venía de ella).
+
+| Página | Qué tiene |
+|---|---|
+| Inicio | Foto de la tienda a casi toda la pantalla, "Ver tienda", "Cómo llegar" y las 6 novedades |
+| Tienda | Buscador, filtro por género y tarjetas (2, 4 o 6 por fila); cada tarjeta abre el detalle del disco en un modal |
+| Cesta | Un ticket de la tienda con las líneas, el total, la dirección de entrega y "Confirmar pedido" |
+| Contacto | Formulario con contador y, al lado, una tarjeta con la tienda física |
+| Gracias | Agradecimiento con el nombre, foto de la fachada, "Ver la tienda", "Volver al inicio" y novedades |
+| Iniciar sesión, Registrarse, Mis datos | Una caja centrada con el formulario |
+| Mis pedidos | Acordeón con los pedidos y su estado; "Volver a comprar" |
+| Discos (admin) | Tabla de discos; añadir y editar en un modal; eliminar con confirmación |
+| Solicitudes (admin) | Pestañas Pendientes y Procesadas con un acordeón; aceptar y rechazar con motivo |
 
 ## 3. Sesiones y protección por rol
 
@@ -67,7 +82,7 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 | Colección | Campos |
 |---|---|
 | `usuarios` | `nombre`, `apellidos`, `email` (índice único), `telefono`, `hashContrasena`, `rol`, `direccion` (`calle`, `codigoPostal`, `localidad`, `provincia`, o `null`), `creadoEn` |
-| `productos` | **Un documento por formato de un disco** (fase 8): `titulo`, `artista`, `formato` (`CD` o `Vinilo`; índice único sobre los tres), `anio`, `generos` (lista de 1 a 3), `descripcion`, `precioCentimos`, `stock`, `idImagen` (texto, o `null`; la comparten los formatos), `busqueda` (título y artista en minúsculas y sin tildes), `creadoEn`. Los datos comunes son iguales en los formatos de un disco: el panel los guarda a la vez, y `api/productos.php` los junta en un disco con su lista de formatos |
+| `productos` | **Un documento por formato de un disco**: `titulo`, `artista`, `formato` (`CD` o `Vinilo`; índice único sobre los tres), `anio`, `generos` (lista de 1 a 3), `descripcion`, `precioCentimos`, `stock`, `idImagen` (texto, o `null`; la comparten los formatos), `busqueda` (título y artista en minúsculas y sin tildes), `creadoEn`. Los datos comunes son iguales en los formatos de un disco: el panel los guarda a la vez, y `api/productos.php` los junta en un disco con su lista de formatos |
 | `imagenes` | `tipoContenido`, `datos` (bytes), `creadoEn` |
 | `pedidos` | `idUsuario`, `comprador` (copia de `nombre`, `apellidos`, `email`, `telefono`), `direccion` (copia), `lineas`, `totalCentimos`, `estado`, `motivoRechazo`, `detalleRechazo`, `creadoEn`, `resueltoEn` |
 | `formularios` | `nombre`, `email`, `asunto`, `mensaje`, `idUsuario` (si había sesión), `creadoEn` |
@@ -82,11 +97,11 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 2. Al confirmar, cada línea se descuenta con una operación atómica (restar solo si el stock es suficiente). Se procesan una a una y se para en la primera que falla; se devuelven solo las ya descontadas y no se crea el pedido.
 3. Si todo va bien, se inserta el pedido en estado `pendiente`. Si la inserción falla, se devuelve también el stock.
 4. Aceptar no toca el stock (ya estaba descontado). Rechazar marca `rechazado` (solo si seguía `pendiente`) y suma el stock de cada línea.
-5. Si el admin elimina un disco: borrado real (salvo que esté en un pedido pendiente). Las cestas lo quitan al leerse y avisan; los pedidos ya procesados conservan su copia de título, artista y precio.
+5. Si el admin elimina un disco: se borran todos sus formatos y su portada (salvo que alguno esté en un pedido pendiente). Las cestas lo quitan al leerse y avisan; los pedidos ya procesados conservan su copia de título, artista, formato y precio.
 
 ## 6. Identidad visual
 
-- Identidad sacada de la tienda física (fase 8): logo real de Elepé en SVG con efecto cromado (`public/img/logo.svg`) y paleta de la fachada, con `data-bs-theme="dark"` de Bootstrap y variables CSS propias: carbón `#141416` (fondo), listón `#232326` (cabecera, tarjetas, modales), cromo `#c9ccd1` (botones, enlaces, detalles), texto `#ecedef`, secundario `#9a9ea5` y borde de los campos `#6e7178`. La interfaz es sobria: el color lo ponen las portadas. Cabecera con listones verticales como la fachada. Los avisos van sobre el color de los listones con una franja a la izquierda (cromo para el éxito, cromo oscuro para las advertencias y un rojo apagado para los errores); los estados de los pedidos se distinguen por la forma y un símbolo (Pendiente con contorno, ✓ Aceptado en cromo, ✕ Rechazado en gris). Las páginas de cuenta (iniciar sesión, registro, mis datos) usan una caja centrada como el ticket de la cesta.
+- Identidad sacada de la tienda física: logo real de Elepé en SVG con efecto cromado (`public/img/logo.svg`) y paleta de la fachada, con `data-bs-theme="dark"` de Bootstrap y variables CSS propias: carbón `#141416` (fondo), listón `#232326` (cabecera, tarjetas, modales), cromo `#c9ccd1` (botones, enlaces, detalles), texto `#ecedef`, secundario `#9a9ea5` y borde de los campos `#6e7178`. La interfaz es sobria: el color lo ponen las portadas. Cabecera con listones verticales como la fachada. Los avisos van sobre el color de los listones con una franja a la izquierda (cromo para el éxito, cromo oscuro para las advertencias y un rojo apagado para los errores); los estados de los pedidos se distinguen por la forma y un símbolo (Pendiente con contorno, ✓ Aceptado en cromo, ✕ Rechazado en gris). Las páginas de cuenta (iniciar sesión, registro, mis datos) usan una caja centrada como el ticket de la cesta.
 - Fuente Outfit (geométrica, como el logo) en toda la web: títulos en 700 y texto en 400 (alojada en `public/fonts/`, cargada con `@font-face`).
 - Contraste revisado con WCAG AA: texto 13,4 a 15,7; secundario 5,8 a 6,8; cromo 9,7 a 11,4; bordes de los campos 3,2 a 3,8 (mínimo 3).
 - Cabecera: logo a la izquierda, enlaces centrados (la página actual, subrayada) y cesta y cuenta a la derecha; en el móvil la cesta y la cuenta quedan a la vista y solo los enlaces van en el menú. El icono de la cuenta cambia con la sesión: contorno (visitante), relleno (comprador) y relleno con la etiqueta "admin". El admin ve sobre el icono el número de solicitudes pendientes (`api/pendientes.php`).
@@ -94,7 +109,7 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 - Pie con los datos reales de la tienda: dirección (enlace a Google Maps), teléfono (`tel:`), menú, Instagram y Facebook, y el © con el año.
 - Iconos SVG propios en `public/img/`.
 - Idioma español, tono cercano, precios en euros con coma decimal (24,99 €).
-- Bootstrap en archivos locales (`bootstrap.min.css` y `bootstrap.bundle.min.js`), sin CDN. Componentes: navbar, dropdown, grid, card, badge, modal, formularios, input-group, tabla, nav-tabs, alert y toast.
+- Bootstrap en archivos locales (`bootstrap.min.css` y `bootstrap.bundle.min.js`), sin CDN. Componentes: navbar, dropdown, grid, card, badge, modal, formularios (con `btn-check` e `input-group`), tabla, nav-tabs, nav-pills, accordion, alert y toast. Sus colores se cambian con las variables `--bs-*` en `estilos.css`, sin tocar los archivos de Bootstrap.
 
 ## 7. Entorno y despliegue
 
@@ -103,7 +118,7 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 - **Composer:** `composer.json` pide `mongodb/mongodb` `^2.5` (instalada la 2.5.1). `composer.lock` se sube; `vendor/` no. El `Dockerfile` instala las dependencias en la imagen con `composer install --no-dev --optimize-autoloader`.
 - **Atlas:** base `elepe_app` en el clúster existente, con un usuario propio que solo tiene `readWrite` sobre esa base.
 - **Variables de entorno:** `MONGODB_URI` y `MONGODB_DB`. `.env` no se sube; `.env.example` es la plantilla sin secretos.
-- **Despliegue:** se decide al final (fase 9). El mismo `Dockerfile` sirve en local y en el servidor.
+- **Despliegue:** la web se ejecuta en local. El mismo `Dockerfile` serviría para desplegarla en un servidor con Docker (por ejemplo Render), poniendo allí las variables de entorno y permitiendo su IP en Atlas.
 
 ## 8. Git
 
@@ -111,8 +126,9 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 - `.gitignore`: `.env`, `vendor/` y `docs/private/`.
 - Un commit por paso terminado y probado, con mensaje corto en español y en minúsculas.
 
-## 9. Notas de implementación (fase 0)
+## 9. Notas de implementación
 
 - `src/config.php` lee `MONGODB_URI` y `MONGODB_DB` con `getenv()` y lanza una excepción si falta alguna.
 - `src/BaseDeDatos.php` es la única clase que habla con Atlas. Crea el cliente la primera vez que hace falta (`conectar()`), con un tiempo máximo de 5 s para elegir servidor, y expone `ping()` para comprobar la conexión.
-- La conexión se comprobó en la fase 0 con un endpoint de prueba, ya retirado. Ahora se comprueba desde la terminal (ver `pruebas.md`).
+- La conexión se comprueba desde la terminal (ver el README y `pruebas.md`).
+- Los scripts de `scripts/` se ejecutan con `docker compose exec web php scripts/<nombre>.php`: `preparar_bd.php` crea los índices únicos, `crear_cuenta.php <rol>` crea una cuenta, `cargar_discos.php` carga el catálogo inicial (se puede repetir) y `migrar_formatos.php` pasa a Vinilo los discos de una base de datos anterior a los formatos.

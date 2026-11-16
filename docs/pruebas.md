@@ -1,8 +1,10 @@
-# Elepe — Plan de pruebas
+# Elepé — Plan de pruebas
 
-Estado: **fase 8 cerrada (16/11/2026)**. Este documento se completa en cada fase con los casos de lo que se va implementando.
+**Estado:** versión final (16/11/2026). 261 casos manuales; 60 marcados como comprobados.
 
-Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http://localhost:8081`. Cuando un caso sale bien, se marca cambiando `[ ]` por `[x]`. Si falla, se deja `[ ]` y se añade debajo una nota con ❌ y lo que pasó.
+Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http://localhost:8081` (ver el README). Cuando un caso sale bien, se marca cambiando `[ ]` por `[x]`. Si falla, se deja `[ ]` y se añade debajo una nota con ❌ y lo que pasó.
+
+Los casos están agrupados por la fase en la que se escribieron. Algunas pantallas cambiaron de aspecto al final (fase 8): cuando un caso antiguo habla de una ficha, una tabla o un color, valen los casos más nuevos de esa misma pantalla (P-213 en adelante). Los requisitos (`RF-` y `RNF-`) están en `requisitos.md`.
 
 ## Fase 0 · Preparación y entorno
 
@@ -14,7 +16,7 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [x] **P-06 · RNF-01** — Pasos: `docker compose exec web php -r "require 'src/BaseDeDatos.php'; BaseDeDatos::ping(); echo 'ok';"`. **Esperado:** Imprime `ok` (PHP conecta con Atlas). Comprobado el 06/11/2026 con un endpoint de prueba, ya retirado
 - [ ] **P-07 · RNF-07** — Pasos: Poner mal la contraseña en `.env`, recrear el contenedor (`docker compose up -d --force-recreate`) y repetir el comando de P-06. **Esperado:** No imprime `ok`; PHP muestra un error de autenticación o de conexión
 - [ ] **P-08 · RNF-07** — Pasos: Quitar `MONGODB_DB` de `.env`, recrear el contenedor y repetir el comando de P-06. **Esperado:** Error `Falta configuración de MongoDB en el entorno.`
-- [x] **P-09 · RNF-02** — Pasos: Con la fase 1 hecha, abrir `/.env`, `/composer.json` y `/src/config.php` en el navegador. **Esperado:** Error 404 en los tres; ningún secreto visible
+- [x] **P-09 · RNF-02** — Pasos: Abrir `/.env`, `/composer.json` y `/src/config.php` en el navegador. **Esperado:** Error 404 en los tres; ningún secreto visible
 
 ## Fase 1 · Base común
 
@@ -30,7 +32,7 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [x] **P-19 · RF-11** — Pasos: Como visitante, abrir el menú de la persona. **Esperado:** Aparecen "Iniciar sesión" y "Registrarse"; el icono de la cesta es visible
 - [x] **P-20 · RF-28** — Pasos: Ver el código fuente de la página (Ctrl+U). **Esperado:** Solo HTML; no se ve ningún `<?php` ni `<?=`
 - [x] **P-21 · RNF-01** — Pasos: Abrir `/css/estilos.css`, `/fonts/outfit.woff2`, `/img/cesta.svg` y `/img/persona.svg`. **Esperado:** Se cargan sin 404
-- [ ] **P-22 · RF-04, RNF-04** — Pasos: Con sesión de comprador y de admin (fase 2), abrir el menú de la persona. **Esperado:** El comprador ve "Mis datos", "Mis pedidos" y "Cerrar sesión" y la cesta; el admin ve "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión" y no ve la cesta
+- [ ] **P-22 · RF-04, RNF-04** — Pasos: Con sesión de comprador y de admin, abrir el menú de la persona. **Esperado:** El comprador ve "Mis datos", "Mis pedidos" y "Cerrar sesión" y la cesta; el admin ve "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión" y no ve la cesta
 
 ## Fase 2 · Cuentas
 
@@ -65,7 +67,7 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-51 · RF-03** — Pasos: Escribir un email que no tiene cuenta y enviar. **Esperado:** El mismo mensaje que en P-50 (no se distingue si falla el email o la contraseña)
 - [ ] **P-52 · RF-03, RF-04** — Pasos: Abrir F12 → Application → Cookies y anotar el valor de `PHPSESSID`; iniciar sesión con una cuenta de comprador creada en el registro. **Esperado:** Redirige a `/`; el menú de la persona muestra "Mis datos", "Mis pedidos" y "Cerrar sesión"; el valor de `PHPSESSID` ha cambiado
 - [ ] **P-53 · RF-04** — Pasos: Con la sesión iniciada, abrir `/iniciar_sesion.php`. **Esperado:** Redirige a `/`
-- [ ] **P-54 · RF-11** — Pasos: Como visitante, abrir `/iniciar_sesion.php?volver=cesta`, mirar el enlace "Regístrate" e iniciar sesión (F12 → Network). **Esperado:** El enlace apunta a `/registro.php?volver=cesta` (y, desde `/registro.php?volver=cesta`, "Inicia sesión" apunta a `/iniciar_sesion.php?volver=cesta`); la respuesta de `login.php` trae `"destino":"/cesta.php"`. La página de la cesta llega en la fase 5: hasta entonces la redirección acaba en un 404
+- [ ] **P-54 · RF-11** — Pasos: Como visitante, abrir `/iniciar_sesion.php?volver=cesta`, mirar el enlace "Regístrate" e iniciar sesión (F12 → Network). **Esperado:** El enlace apunta a `/registro.php?volver=cesta` (y, desde `/registro.php?volver=cesta`, "Inicia sesión" apunta a `/iniciar_sesion.php?volver=cesta`); la respuesta de `login.php` trae `"destino":"/cesta.php"`.
 - [ ] **P-55 · RF-11, RNF-03** — Pasos: Iniciar sesión desde `/iniciar_sesion.php?volver=https://sitio-malo.com`. **Esperado:** `"destino":"/"` (un valor fuera de la lista permitida se ignora)
 - [ ] **P-56 · RF-03, RNF-03** — Pasos: `curl -X POST http://localhost:8081/api/login.php -H "Content-Type: application/json" -d "{\"email\":\"prueba@elepe.test\",\"contrasena\":\"\"}"`. **Esperado:** `{"ok":false,"error":"DATOS_INVALIDOS"}` (PHP valida aunque el JS no)
 - [ ] **P-57 · RF-03** — Pasos: El mismo `curl` con un email registrado y una contraseña equivocada, y otra vez con un email que no existe. **Esperado:** Las dos respuestas son idénticas: `{"ok":false,"error":"CREDENCIALES_INCORRECTAS"}`
@@ -79,7 +81,7 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [ ] **P-65 · RF-05, RF-02** — Pasos: `docker compose exec web php scripts/crear_cuenta.php admin` y escribir datos malos: nombre `Al`, email `x`, teléfono `512345678`, contraseña `abcdefgh` y, con una buena, una repetición distinta. **Esperado:** Cada dato malo muestra su aviso y vuelve a preguntar lo mismo; la repetición distinta muestra "Las contraseñas no coinciden."
 - [ ] **P-66 · RF-05, RNF-05** — Pasos: Crear un admin con datos válidos. **Esperado:** La contraseña no se ve mientras se escribe; termina con `Cuenta creada: <email> (admin).`; en Atlas el usuario tiene `rol: admin`, `direccion: null` y `hashContrasena` que empieza por `$2y$`, y ningún campo con la contraseña
 - [ ] **P-67 · RF-05, RF-01** — Pasos: Repetir el script (cualquier rol) con el mismo email. **Esperado:** `Ya existe una cuenta con ese email. No se ha creado ninguna cuenta.` y en Atlas sigue habiendo un solo usuario con ese email
-- [ ] **P-68 · RF-05, RF-04** — Pasos: Iniciar sesión en la web con el admin creado en P-66. **Esperado:** Funciona; el menú de la persona muestra "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión", y **no** se ve la cesta (esto cubre también P-22 para el admin; las páginas del menú darán 404 hasta las fases 2.6 y 3)
+- [ ] **P-68 · RF-05, RF-04** — Pasos: Iniciar sesión en la web con el admin creado en P-66. **Esperado:** Funciona; el menú de la persona muestra "Mis datos", "Discos", "Solicitudes" y "Cerrar sesión", y **no** se ve la cesta (esto cubre también P-22 para el admin)
 - [ ] **P-69 · RF-05** — Pasos: `docker compose exec web php scripts/crear_cuenta.php comprador`, crear una cuenta (por ejemplo con el email en mayúsculas y con espacios) y entrar con ella en la web. **Esperado:** Se crea con `rol: comprador`, el email queda en minúsculas y el menú es el del comprador
 - [ ] **P-70 · RNF-02** — Pasos: Abrir `http://localhost:8081/scripts/crear_cuenta.php` en el navegador. **Esperado:** 404 (el script está fuera de `public/` y no tiene URL)
 - [ ] **P-71 · RF-05** — Pasos: Lanzar el script y cortarlo con Ctrl+C a mitad de las preguntas. **Esperado:** No se crea ninguna cuenta en Atlas
@@ -148,7 +150,7 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 - [x] **P-123 · RF-10** — Pasos: Con F12 → Network abierto, pulsar "Jazz" y después "Todos". **Esperado:** Con "Jazz" quedan 3 fichas y el botón "Jazz" queda elegido; se ve la petición `productos.php?genero=Jazz`; con "Todos" vuelven todas
 - [ ] **P-124 · RF-10** — Pasos: Como admin, crear un disco de un género nuevo (por ejemplo "Nu metal") y abrir la tienda; después borrar ese disco y recargar la tienda. **Esperado:** El botón "Nu metal" aparece solo y al pulsarlo se ve solo ese disco; tras borrarlo, el botón desaparece
 - [ ] **P-125 · RF-10** — Pasos: Pulsar dos géneros seguidos muy rápido (por ejemplo "Rock" y enseguida "Pop"). **Esperado:** Quedan los discos de "Pop" y el botón "Pop" elegido
-- [x] **P-126 · RF-12** — Pasos: Como visitante, poner 2 en "Unidades" de *Thriller* y pulsar "Añadir a la cesta". **Esperado:** Modal "Añadido a la cesta" con "Has añadido 2 unidades de «Thriller»." y los botones "Seguir comprando" (lo cierra) e "Ir a la cesta" (fase 8); el icono de la cesta muestra un `2` en cromo; el campo vuelve a 1
+- [x] **P-126 · RF-12** — Pasos: Como visitante, poner 2 en "Unidades" de *Thriller* y pulsar "Añadir a la cesta". **Esperado:** Modal "Añadido a la cesta" con "Has añadido 2 unidades de «Thriller»." y los botones "Seguir comprando" (lo cierra) e "Ir a la cesta"; el icono de la cesta muestra un `2` en cromo; el campo vuelve a 1
 - [x] **P-127 · RF-12** — Pasos: Añadir otra vez 1 unidad de *Thriller*. **Esperado:** "Has añadido 1 unidad de «Thriller». En tu cesta ya tienes 3 unidades de este disco."; la cabecera muestra `3`
 - [ ] **P-128 · RF-09, RNF-03** — Pasos: En *Kind of Blue* (stock 1), escribir `3` y pulsar "Añadir a la cesta" con F12 → Network abierto. **Esperado:** El campo sale en rojo con "De 1 a 1." y no se envía ninguna petición; al escribir se quita el rojo
 - [x] **P-129 · RF-12, RF-14** — Pasos: Añadir 1 *Kind of Blue* y, después, intentarlo otra vez. **Esperado:** La primera vez se añade; la segunda sale "No se ha podido añadir" con "Ya tienes 1 unidad en la cesta y solo queda 1." y el número de la cesta no cambia
@@ -268,7 +270,7 @@ Cómo usarlo: la aplicación se ejecuta en local con Docker y se abre en `http:/
 
 ## Fase 8 · Formatos, géneros, buscador y tarjeta nueva
 
-Antes de probar: `docker compose exec web php scripts/migrar_formatos.php` (una vez).
+Solo con una base de datos anterior a los formatos: antes de probar, `docker compose exec web php scripts/migrar_formatos.php` (una vez).
 
 - [ ] **P-228 · RF-08** — Pasos: Tras la migración, abrir la tienda y el panel "Discos". **Esperado:** Los discos de antes siguen ahí, con su portada, precio y stock, en formato Vinilo y con su género
 - [ ] **P-229 · RF-09** — Pasos: Abrir la tienda con la ventana ancha y estrecha. **Esperado:** Tarjetas pequeñas (6 por fila en escritorio, 4 en tableta, 2 en el móvil) con portada, título, artista, precio y formatos; "desde X €" si tiene dos formatos; "Agotado" si no queda de ninguno; al pasar el ratón la portada crece un poco

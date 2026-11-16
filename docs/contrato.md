@@ -1,4 +1,4 @@
-# Elepe — Contrato JS–PHP
+# Elepé — Contrato JS–PHP
 
 ## Reglas comunes
 
@@ -7,7 +7,6 @@
 - Mismo origen: la página y la API se sirven desde el mismo dominio, así que no hace falta CORS.
 - Errores de Atlas: PHP devuelve solo `BD_NO_DISPONIBLE` (503); el detalle va al registro del servidor.
 - Los endpoints de `api/` comprueban primero el método HTTP y, si la operación lo exige, el rol del usuario (401 sin sesión, 403 sin permiso).
-- Los endpoints de cada fase se añaden a este documento cuando se implementan.
 
 ## Códigos HTTP usados
 
@@ -25,7 +24,7 @@
 
 ## Operaciones
 
-Cada operación se documenta aquí (método, entrada, respuestas y errores) cuando se implementa.
+Cada operación con su método, quién la puede usar, la entrada, la respuesta correcta y los errores.
 
 ### POST /api/registro.php
 
@@ -74,7 +73,7 @@ Guarda los datos de la persona que tiene la sesión iniciada.
 
 ### GET /api/productos.php
 
-Lista los discos, los más nuevos primero, con sus formatos juntos (fase 8). En Atlas cada formato (CD, Vinilo) es un documento de `productos`; este endpoint junta los que tienen el mismo título y artista en un solo disco.
+Lista los discos, los más nuevos primero, con sus formatos juntos. En Atlas cada formato (CD, Vinilo) es un documento de `productos`; este endpoint junta los que tienen el mismo título y artista en un solo disco.
 
 - **Quién:** cualquiera, también visitantes (lo usan la tienda, el inicio y el panel del admin).
 - **Entrada (en la dirección, opcional):** `genero` (texto de 2 a 30 caracteres; los discos que lo tienen entre sus géneros), `q` (lo que se busca en el título y el artista, de 2 a 60 caracteres, sin importar mayúsculas ni tildes) y `limite` (de 1 a 50 discos).

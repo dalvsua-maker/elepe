@@ -1,17 +1,31 @@
-# Elepe
+# Elepé
 
-Tienda online de discos y vinilos para navegador. Tiene una landing, una tienda con filtro por género, contacto, cuentas de comprador (cesta, pedidos y su historial) y un panel de administración para gestionar los discos y aceptar o rechazar las solicitudes de compra.
+Tienda online de discos y vinilos inspirada en Elepé, la tienda de discos de la Rúa do Doutor Cadaval de Vigo (desde 1979). Su aspecto imita el de la tienda física: el logo de la fachada, sus listones oscuros y sus letras cromadas.
 
-**Estado:** versión funcional completa (fase 8 de 9 cerrada: landing y aspecto visual). Este README se irá completando.
+Proyecto de clase de 2º de DAW.
+
+## Qué hace
+
+- **Inicio:** una foto de la tienda, cómo llegar y las novedades.
+- **Tienda:** discos en CD y en Vinilo, cada formato con su precio y su stock. Se puede filtrar por género y buscar por título o artista. Cada disco tiene una ventana de detalle con su descripción, el formato y las unidades.
+- **Cesta:** está abierta también a los visitantes y se muestra como un ticket de la tienda. Se pueden cambiar las unidades al momento y quitar discos con "Deshacer". Para confirmar el pedido hay que iniciar sesión.
+- **Cuentas de comprador:** registro, inicio de sesión, "Mis datos" con la dirección de entrega y "Mis pedidos", con el estado de cada pedido y "Volver a comprar".
+- **Administración:**
+  - **Discos:** añadir, editar y eliminar, con portada, géneros y formatos.
+  - **Solicitudes de compra:** aceptarlas o rechazarlas con un motivo. Rechazar devuelve el stock.
+  - **Aviso en la cabecera:** muestra las solicitudes pendientes.
+- **Contacto:** un formulario con los datos de la tienda física al lado. Los mensajes se guardan en la base de datos y, al enviar, se llega a una página de agradecimiento.
+
+El detalle de cada función está en `docs/requisitos.md`.
 
 ## Tecnologías
 
-- **Frontend:** HTML, CSS, Bootstrap y JavaScript.
+- **Frontend:** HTML, CSS, Bootstrap 5.3.8 (archivos locales, sin CDN) y JavaScript sin librerías.
 - **Backend:** PHP 8.3 con la librería oficial `mongodb/mongodb`.
 - **Base de datos:** MongoDB Atlas.
-- **Desarrollo:** Docker (PHP + Apache) y Composer.
+- **Entorno:** Docker (PHP + Apache) y Composer.
 
-## Ejecutar en local (desarrollo)
+## Ejecutar en local
 
 Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base de datos y tu IP permitida en *Network Access*.
 
@@ -24,7 +38,7 @@ Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base
    ```
    docker compose exec web composer install
    ```
-4. Prepara la base de datos (crea los índices; se puede repetir sin problema y conviene ejecutarlo de nuevo cuando se añade un índice, como el de los discos):
+4. Prepara la base de datos (crea los índices únicos; se puede repetir sin problema):
    ```
    docker compose exec web php scripts/preparar_bd.php
    ```
@@ -37,13 +51,15 @@ Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base
    ```
    docker compose exec web php scripts/crear_cuenta.php admin
    ```
-7. Carga los 12 discos iniciales (sin portada; se pueden repetir sin duplicarse, y las portadas se suben después desde el panel de discos):
+7. Carga el catálogo inicial: 14 discos con sus géneros y sus formatos. Se crean sin portada; las portadas se suben después desde el panel "Discos". El script se puede repetir sin duplicar nada.
    ```
    docker compose exec web php scripts/cargar_discos.php
    ```
-8. La web estará en `http://localhost:8081`.
+8. La web está en `http://localhost:8081`.
 
 Si cambias el `.env`, recrea el contenedor con `docker compose up -d --force-recreate`.
+
+Si tienes una base de datos creada antes de que existieran los formatos (un solo precio y stock por disco), ejecuta una vez `docker compose exec web php scripts/migrar_formatos.php`. Pasa esos discos a Vinilo y actualiza el índice.
 
 ## Configuración (`.env`)
 
@@ -57,26 +73,31 @@ El archivo `.env` contiene credenciales y **nunca se sube a Git** (está en `.gi
 ## Estructura
 
 ```
-Dockerfile, docker-compose.yml  Imagen (desarrollo y producción) y arranque local
-public/            Lo único accesible desde el navegador (páginas, css, js, img, api)
-src/               PHP interno: configuración, conexión con Atlas, sesiones y validación
-scripts/           Scripts de terminal (preparar la base de datos, crear cuentas y cargar los discos iniciales)
+Dockerfile, docker-compose.yml  Imagen (PHP 8.3 + Apache + extensión mongodb) y arranque local
+public/            Lo único accesible desde el navegador: páginas .php, css, js, img, fonts y api/
+src/               PHP interno: configuración, conexión con Atlas, respuestas, validación, sesión y cesta
+src/partes/        Cabecera, pie y modales compartidos
+scripts/           Scripts de terminal: preparar la base de datos, crear cuentas, cargar discos y migrar
 docs/              Documentación del proyecto
 ```
 
-La estructura completa prevista está en `docs/disenyo.md`.
+La estructura completa está en `docs/disenyo.md`.
 
 ## Documentación
 
 En `docs/`:
 
-- `requisitos.md`: qué debe hacer la tienda.
-- `disenyo.md`: estructura, páginas, datos, sesiones y entorno.
-- `contrato.md`: el contrato entre el JS y el PHP (se completa con cada fase).
-- `pruebas.md`: plan de pruebas (se completa con cada fase).
+- `requisitos.md`: qué hace la tienda (roles, requisitos funcionales y no funcionales, limitaciones).
+- `disenyo.md`: estructura, páginas, sesiones, datos, flujo de compra, identidad visual y entorno.
+- `contrato.md`: el contrato entre el JavaScript y el PHP (cada endpoint de `api/`).
+- `pruebas.md`: el plan de pruebas manuales.
 
 ## Seguridad
 
 - Las credenciales de Atlas solo existen en el servidor.
 - Apache solo sirve `public/`: el código interno y el `.env` no tienen URL.
+- PHP valida todo lo que recibe y comprueba el rol en cada página protegida y en cada endpoint.
+- Las contraseñas se guardan con `password_hash`.
 - El repositorio es público: ningún secreto se sube a Git.
+
+Las limitaciones conocidas (por ejemplo, sin protección CSRF ni límite de intentos en el login) están en `docs/requisitos.md`.
