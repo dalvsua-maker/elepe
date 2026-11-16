@@ -364,6 +364,12 @@ h3,
   background-color: var(--cromo);
 }
 
+/* Gracias: la foto de la fachada con su pie, como una foto impresa; no crece más de 22rem para no pixelarse */
+.foto-fachada {
+  max-width: 22rem;
+  border: 1px solid var(--borde);
+}
+
 
 /* Portada en la tabla del panel: un botón sin aspecto de botón que abre "Editar" */
 .boton-portada {

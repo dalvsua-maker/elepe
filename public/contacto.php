@@ -10,14 +10,20 @@ $titulo = 'Contacto · Elepe';
 require __DIR__ . '/../src/partes/cabecera.php';
 ?>
 
-<!-- Formulario de contacto -->
+<!-- Contacto: el formulario a la izquierda y, al lado, la tarjeta de la tienda física
+     (en el móvil, la tarjeta baja debajo del formulario) -->
 <section class="py-5">
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
-        <h1 class="h2 mb-2">Escríbenos</h1>
-        <p class="text-secondary mb-4">¿Buscas un disco que no ves en la tienda? ¿Dudas con tu pedido? Cuéntanoslo y te contestamos por email.</p>
+    <p class="antetitulo mb-1">Contacto</p>
+    <div class="d-flex align-items-center gap-3 mb-2">
+      <h1 class="h2 mb-0">Escríbenos</h1>
+      <span class="balda flex-grow-1" aria-hidden="true"></span>
+    </div>
+    <p class="text-secondary mb-4 entradilla">¿Buscas un disco que no ves en la tienda? ¿Dudas con tu pedido? Cuéntanoslo y te contestamos por email.</p>
 
+    <div class="row g-4 g-lg-5">
+      <!-- Formulario -->
+      <div class="col-lg-7">
         <form id="formulario-contacto" data-con-sesion="<?= $conSesion ? 'si' : 'no' ?>" novalidate>
           <div class="row g-3">
             <div class="col-md-6">
@@ -53,6 +59,23 @@ require __DIR__ . '/../src/partes/cabecera.php';
 
           <button type="submit" id="boton-enviar" class="btn btn-primary mt-4">Enviar mensaje</button>
         </form>
+      </div>
+
+      <!-- La tienda física: foto del interior, dirección, teléfono, Instagram y cómo llegar -->
+      <div class="col-lg-5">
+        <aside class="card overflow-hidden">
+          <img src="/img/tienda/interior-mostrador.webp" class="card-img-top" alt="Interior de Elepé: las cubetas de discos y el mostrador" width="512" height="288">
+          <div class="card-body p-4">
+            <h2 class="pie-titulo">O pásate por la tienda</h2>
+            <address class="mb-3">
+              Rúa do Doutor Cadaval, 37<br>
+              36202 Vigo, Pontevedra<br>
+              <a class="pie-enlace d-inline-block mt-2" href="tel:+34986227614">986 22 76 14</a><br>
+              <a class="pie-enlace" href="https://www.instagram.com/discos_elepe/" target="_blank" rel="noopener">Instagram<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+            </address>
+            <a class="btn btn-outline-light" href="https://www.google.com/maps/search/?api=1&amp;query=Elep%C3%A9%20R%C3%BAa%20do%20Doutor%20Cadaval%2037%20Vigo" target="_blank" rel="noopener">Cómo llegar<span class="visually-hidden"> (abre Google Maps en otra pestaña)</span></a>
+          </div>
+        </aside>
       </div>
     </div>
   </div>
