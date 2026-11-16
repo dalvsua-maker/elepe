@@ -104,4 +104,4 @@ Tecnologías permitidas: **HTML, CSS, Bootstrap, JavaScript y PHP**. Base de dat
 | 6 | Pedidos y solicitudes (confirmar, mis pedidos, volver a comprar, solicitudes del admin) | Cerrada (12/11/2026) |
 | 7 | Contacto y "Gracias" | Cerrada (13/11/2026) |
 | 8 | Landing y aspecto visual (identidad de la tienda, formatos CD y Vinilo, varios géneros y buscador) | Cerrada (16/11/2026) |
-| 9 | Documentación final | Hecha (16/11/2026). Las pruebas manuales están en `pruebas.md`; la web se ejecuta en local (sin despliegue público) |
+| 9 | Documentación final y despliegue | Hecha (16/11/2026): publicada en Render, https://elepe-a8o9.onrender.com/. Las pruebas manuales están en `pruebas.md` |

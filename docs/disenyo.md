@@ -118,7 +118,7 @@ Los nombres de archivo van en español, en minúsculas y con guion bajo.
 - **Composer:** `composer.json` pide `mongodb/mongodb` `^2.5` (instalada la 2.5.1). `composer.lock` se sube; `vendor/` no. El `Dockerfile` instala las dependencias en la imagen con `composer install --no-dev --optimize-autoloader`.
 - **Atlas:** base `elepe_app` en el clúster existente, con un usuario propio que solo tiene `readWrite` sobre esa base.
 - **Variables de entorno:** `MONGODB_URI` y `MONGODB_DB`. `.env` no se sube; `.env.example` es la plantilla sin secretos.
-- **Despliegue:** la web se ejecuta en local. El mismo `Dockerfile` serviría para desplegarla en un servidor con Docker (por ejemplo Render), poniendo allí las variables de entorno y permitiendo su IP en Atlas.
+- **Despliegue:** publicada en Render (plan gratuito, runtime Docker) en https://elepe-a8o9.onrender.com/, con el mismo `Dockerfile` que en local. Las variables `MONGODB_URI` y `MONGODB_DB` se ponen en Render, y Atlas permite los rangos de IP de salida del servicio. Local y la web publicada comparten la base de datos `elepe_app`. Cada push a `main` vuelve a desplegar. El servicio gratuito se duerme tras 15 minutos sin visitas (la primera carga tarda alrededor de un minuto) y entonces se pierden las sesiones.
 
 ## 8. Git
 

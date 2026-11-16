@@ -4,6 +4,10 @@ Tienda online de discos y vinilos inspirada en Elepé, la tienda de discos de la
 
 Proyecto de clase de 2º de DAW.
 
+**Web publicada:** https://elepe-a8o9.onrender.com/
+
+Está en el plan gratuito de Render: si nadie la ha visitado en los últimos 15 minutos, la primera carga tarda alrededor de un minuto mientras el servicio despierta.
+
 ## Qué hace
 
 - **Inicio:** una foto de la tienda, cómo llegar y las novedades.
@@ -60,6 +64,18 @@ Requisitos: Docker Desktop y un clúster de MongoDB Atlas con un usuario de base
 Si cambias el `.env`, recrea el contenedor con `docker compose up -d --force-recreate`.
 
 Si tienes una base de datos creada antes de que existieran los formatos (un solo precio y stock por disco), ejecuta una vez `docker compose exec web php scripts/migrar_formatos.php`. Pasa esos discos a Vinilo y actualiza el índice.
+
+## Despliegue (Render)
+
+La web publicada usa el mismo `Dockerfile` que el entorno local y la misma base de datos de Atlas:
+
+1. En Render, **New → Web Service** con este repositorio (rama `main`). Render detecta el `Dockerfile` y usa el runtime Docker.
+2. En **Environment Variables**, `MONGODB_URI` y `MONGODB_DB` con los mismos valores que el `.env`. No hace falta `PORT`: Render pone la suya y Apache la usa.
+3. En Atlas, **Network Access**: añadir los rangos de IP de salida del servicio (en Render, **Connect → Outbound**).
+
+Cada push a `main` vuelve a desplegar la web. Los scripts de `scripts/` se ejecutan en local: como la base de datos es la misma, sus cambios también se ven en la web publicada.
+
+En el plan gratuito las sesiones se pierden cuando el servicio se duerme o se reinicia (hay que volver a iniciar sesión y la cesta se vacía). Los discos, las portadas, las cuentas y los pedidos están en Atlas y no se pierden.
 
 ## Configuración (`.env`)
 
